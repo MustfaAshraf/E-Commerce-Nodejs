@@ -1,116 +1,95 @@
 const User = require('../models/users.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { matchedData } = require('express-validator');
 
 // Register
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role, address } = req.body;
+    const data = matchedData(req);
 
-    // Check if email exists
-    const exists = await User.findOne({ email });
+    const exists = await User.findOne({ email: data.email });
     if (exists) {
-      return res.status(400).json({
-        status: "fail",
-        data: { 
-            message: "Email already registered" 
-        }
+      return res.status(400).render('/register', { 
+        message: "Email already registered",
+        userInput: req.body // Send back input so they don't have to re-type everything
       });
     }
 
-    const hashedPassword = await bcrypt.hash(String(password), 10);
-
-    // Create user
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    
     const user = await User.create({
-      name,
-      email,
+      name: data.name,
+      email: data.email,
       password: hashedPassword,
-      address,
-      role
+      address: data.address
     });
 
-    // Generate token
+    // 5. GENERATE TOKEN
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    user.token = token;
-    await user.save();
-
-    // Store token in HTTP-Only cookie
+    // 6. SET COOKIE ONLY (Do not save to DB)
     res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-  });
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // True only on https
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
-
-    // Redirect after login
     return res.redirect("/");
 
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      status: "error",
-      message: "Server error"
-    });
+    console.error("Register Error:", err);
+    return res.status(500).render('error', { message: "Server error during registration" });
   }
 };
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const data = matchedData(req); 
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: data.email });
     if (!user) {
-      return res.status(404).json({
-        status: "fail",
-        data: { 
-            message: "User not found" 
-        }
+      return res.status(401).render('/login', { 
+        message: "Invalid email or password",
+        userInput: { email: data.email }
       });
     }
 
-    const valid = await bcrypt.compare(String(password), user.password);
+    // 3. CHECK PASSWORD
+    const valid = await bcrypt.compare(data.password, user.password);
     if (!valid) {
-      return res.status(401).json({
-        status: "fail",
-        data: { 
-            message: "Invalid password" 
-        }
+      return res.status(401).render('/login', { 
+        message: "Invalid email or password", // Same message for security
+        userInput: { email: data.email }
       });
     }
 
+    // 4. GENERATE TOKEN
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
-    console.log('token -> ', token);
-    user.token = token;
-    await user.save();
 
-    // Store token in HTTP-Only cookie
+    // 5. SET COOKIE (Removed the DB save part)
     res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-  });
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
-
-    // Redirect after login
+    // 6. SUCCESS REDIRECT
     return res.redirect("/");
 
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      status: "error",
-      message: "Server error"
-    });
+    console.error("Login Error:", err);
+    return res.status(500).render('error', { message: "Server error during login" });
   }
 };
 
