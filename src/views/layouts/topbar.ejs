@@ -1,0 +1,66 @@
+<!-- Topbar Start -->
+<div class="container-fluid px-5 py-4 d-none d-lg-block">
+    <div class="row gx-0 align-items-center text-center">
+
+        <!-- Logo -->
+        <div class="col-md-4 col-lg-3 text-center text-lg-start">
+            <div class="d-inline-flex align-items-center">
+                <a href="/" class="navbar-brand p-0">
+                    <h1 class="display-5 text-primary m-0">
+                        <i class="fas fa-shopping-bag text-secondary me-2"></i>Electro
+                    </h1>
+                </a>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="col-md-4 col-lg-6 text-center">
+            <div class="position-relative ps-4">
+                <div class="d-flex border rounded-pill">
+                    <input class="form-control border-0 rounded-pill w-100 py-3"
+                        type="text" placeholder="Search Looking For?">
+                    <button type="button" class="btn btn-primary rounded-pill py-3 px-5">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section (Login / Register OR User Area) -->
+        <div class="col-md-4 col-lg-3 text-center text-lg-end">
+            <div class="d-inline-flex align-items-center">
+
+                <% if (!isAuthenticated) { %>
+                    <a href="/login"
+                        class="text-muted d-flex align-items-center justify-content-center me-2">
+                        <span class="rounded-pill border px-4 py-2 fw-semibold">
+                            Login
+                        </span>
+                    </a>
+
+                    <a href="/register"
+                        class="text-muted d-flex align-items-center justify-content-center">
+                        <span class="rounded-pill border px-4 py-2 fw-semibold text-primary">
+                            Sign Up
+                        </span>
+                    </a>
+
+                <% } else { %>
+                    <!-- Logged-in content goes here -->
+                    <a href="/profile" class="text-muted me-3">
+                        <span class="rounded-circle btn-md-square border">
+                            <i class="fas fa-user"></i>
+                        </span>
+                    </a>
+                    <a href="/auth/logout" class="text-muted">
+                        <span class="rounded-circle btn-md-square border">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </span>
+                    </a>
+                <% } %>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Topbar End -->
