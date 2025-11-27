@@ -77,6 +77,16 @@
             color: #ff7a00;
             text-decoration: none;
         }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -88,11 +98,25 @@
             <h2>Welcome Back!</h2>
         </div>
 
+        <!-- LOGIC: Check if a message exists, and display it -->
+        <% if (typeof message !== 'undefined' && message) { %>
+            <div class="alert-error">
+                <%= message %>
+            </div>
+        <% } %>
+
         <form action="/auth/login" method="POST">
 
             <div class="form-group">
                 <label>Email Address</label>
-                <input type="email" name="email" placeholder="Enter Email" required />
+                <!-- LOGIC: If userInput exists, put the email back in the box -->
+                <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Enter Email" 
+                    value="<%= (typeof userInput !== 'undefined' && userInput.email) ? userInput.email : '' %>"
+                    required 
+                />
             </div>
 
             <div class="form-group">

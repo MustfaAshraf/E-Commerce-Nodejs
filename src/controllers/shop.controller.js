@@ -19,14 +19,24 @@ exports.getCheckout = (req, res) => {
   res.render('shop/checkout.ejs');
 };
 
+exports.getNotFound = (req, res) => {
+  res.render('shop/404.ejs');
+};
+
 exports.getContact = (req, res) => {
   res.render('shop/contact.ejs');
 };
 
 exports.getLogin = (req, res) => {
-  res.render("auth/login.ejs");
+  res.render("auth/login.ejs",{
+    message: null,
+    userInput: {}
+  });
 };
 
 exports.getRegister = (req, res) => {
-  res.render("auth/register.ejs");
+  res.render("auth/register.ejs", {
+    message: null,
+    userInput: {}
+  });
 };

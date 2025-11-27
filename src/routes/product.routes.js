@@ -1,18 +1,46 @@
 const express = require('express');
 const router = express.Router();
 
-const auth = require('../middlewares/auth.middleware');      // adjust path/name if yours differs
-const ownerOnly = require('../middlewares/ownerOnly.middleware'); // adjust path/name if yours differs
-const upload = require('../middlewares/fileUpload.middleware');
-
+// 1. Import Controllers & Middlewares
 const controller = require('../controllers/product.controller');
+const auth = require('../middlewares/auth.middleware');
+const ownerOnly = require('../middlewares/ownerOnly.middleware'); 
+const upload = require('../middlewares/fileUpload.middleware');
+const validate = require('../middlewares/validationResult.middleware');
+const { productRules } = require('../validations/product.validator');
+
+
+router.get('/add', auth, ownerOnly('error'), controller.getAddProductPage);
+
+// POST: Process the form
+router.post('/add', 
+    auth, 
+    ownerOnly('error'), 
+    upload.single('image'),           // 1. Upload File
+    productRules,                     // 2. Check Rules (Joi/Express-Validator)
+    validate('products/add-product'), // 3. If Error: Delete file & Render Form
+    controller.createProduct          // 4. Success: Save to DB
+);
+
+// 2. Edit Product
+router.get('/edit/:id', auth, ownerOnly('error'), controller.getEditProductPage);
+
+// POST: Update the data (Using POST because HTML Forms don't support PATCH natively)
+router.post('/edit/:id', 
+    auth, 
+    ownerOnly('error'), 
+    upload.single('image'), 
+    productRules, 
+    validate('products/add-product'), // Re-use the same view for errors
+    controller.updateProduct
+);
+
+// 3. Delete Product
+router.post('/delete/:id', auth, ownerOnly('error'), controller.deleteProduct);
 
 router.get('/', controller.getProducts);
+
 router.get('/:id', controller.getProduct);
 
-// admin
-router.post('/', auth, ownerOnly, upload.single('image'), controller.createProduct);
-router.patch('/:id', auth, ownerOnly, upload.single('image'), controller.updateProduct);
-router.delete('/:id', auth, ownerOnly, controller.deleteProduct);
 
 module.exports = router;

@@ -3,138 +3,168 @@ const Category = require('../models/category.model');
 const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
+const { matchedData } = require('express-validator'); // Import this!
 
-exports.createProduct = async (req, res) => {
+// 1. GET: Show the "Add Product" Form
+exports.getAddProductPage = async (req, res) => {
   try {
-    const { name, category, description, price, quantity } = req.body;
-
-    // basic validation
-    if (!name || !category || !price) {
-      return res.status(400).json({
-        status: 'fail',
-        data: { message: 'name, category and price are required' }
-      });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(category)) {
-      return res.status(400).json({
-        status: 'fail',
-        data: { message: 'invalid category id' }
-      });
-    }
-
-    const cat = await Category.findById(category);
-    if (!cat) {
-        return res.status(404).json({ 
-            status: 'fail', 
-            data: { 
-                message: 'Category not found' 
-            } 
-        });
-    }
-
-    const product = await Product.create({
-      name,
-      category,
-      description,
-      price,
-      quantity: quantity || 0,
-      image: req.file ? req.file.filename : undefined
-    });
-
-    return res.status(201).json({ 
-        status: 'success', 
-        data: { product } 
+    const categories = await Category.find();
+    res.render('products/add-product', {
+      pageTitle: 'Add Product',
+      categories: categories,
+      userInput: {}, // Empty start
+      message: null,
+      editing: false
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ 
-        status: 'error', 
-        message: err.message 
-    });
+    res.status(500).render('error', { message: err.message });
   }
 };
 
+// 2. POST: Create the Product
+exports.createProduct = async (req, res) => {
+  try {
+    const data = matchedData(req);
+
+    if (!req.file) {
+      // If no image, render error (and we don't need to delete anything)
+      const categories = await Category.find();
+      return res.status(400).render('products/add-product', {
+        message: 'Product image is required',
+        categories,
+        userInput: req.body,
+        editing: false
+      });
+    }
+
+    // C. Create Product
+    await Product.create({
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      quantity: data.quantity || 0,
+      category: data.category,
+      image: req.file.filename,
+      owner: req.user._id // <--- CRITICAL: Save the logged-in user ID
+    });
+
+    // D. Success -> Redirect to Shop
+    return res.redirect('/shop');
+
+  } catch (err) {
+    console.error(err);
+    // If DB fails (e.g., connection lost), we must delete the uploaded image
+    // to prevent "garbage" files in our server
+    if (req.file) {
+      fs.unlink(req.file.path, (err) => { if (err) console.error(err); });
+    }
+    return res.status(500).render('error', { message: 'Database creation failed' });
+  }
+};
+
+// 3. GET: Show All Products (Shop Page)
 exports.getProducts = async (req, res) => {
   try {
-    // simple pagination & filtering
-    const query = req.query;
-    const limit = query.limit || 10;
-    const page = query.page || 1;
+    // Simple Filter & Pagination
+    const page = +req.query.page || 1;
+    const limit = 9; // Show 9 products per page
     const skip = (page - 1) * limit;
 
     const filter = {};
-    if (query.category && mongoose.Types.ObjectId.isValid(query.category)) {
-      filter.category = query.category;
-    }
-    if (query.name) {
-      filter.name = { $regex: query.name, $options: 'i' };
-    }
-    if (query.minPrice) filter.price = { ...(filter.price || {}), $gte: Number(query.minPrice) };
-    if (query.maxPrice) filter.price = { ...(filter.price || {}), $lte: Number(query.maxPrice) };
+    if (req.query.category) filter.category = req.query.category;
+    if (req.query.search) filter.name = { $regex: req.query.search, $options: 'i' };
 
-    const [products, total] = await Promise.all([
-      Product.find(filter).populate('category').skip(skip).limit(limit).sort({ createdAt: -1 }),
-      Product.countDocuments(filter)
-    ]);
+    // Fetch Products & Count
+    const products = await Product.find(filter)
+      .populate('category') // So we can show "Shoes" instead of ID
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
 
-    return res.status(200).json({
-      status: 'success',
-      data: { 
-        products, 
-        meta: { 
-            total, 
-            page, 
-            limit 
-        } }
+    const totalProducts = await Product.countDocuments(filter);
+
+    // Render the Shop View
+    return res.render('/shop', {
+      pageTitle: 'Shop',
+      products: products,
+      currentPage: page,
+      hasNextPage: limit * page < totalProducts,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage: Math.ceil(totalProducts / limit)
     });
+
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ 
-        status: 'error', 
-        message: err.message 
-    });
+    return res.status(500).render('error', { message: 'Could not load products' });
   }
 };
 
+// 4. GET: Show Single Product Details
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category');
+    const product = await Product.findById(req.params.id).populate('category').populate('owner', 'name'); // Show owner name?
+
     if (!product) {
-        return res.status(404).json({ 
-            status: 'fail', 
-            data: { 
-                message: 'Product not found' 
-            } 
-        });
+      return res.status(404).render('error', { message: 'Product not found' });
     }
-    return res.status(200).json({ 
-        status: 'success', 
-        data: { product } 
+
+    return res.render('shop/single', {
+      pageTitle: product.name,
+      product: product
     });
+
+  } catch (err) {
+    return res.status(500).render('error', { message: err.message });
+  }
+};
+
+exports.getEditProductPage = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    
+    if (!product) {
+        return res.status(404).render('error', { message: 'Product not found' });
+    }
+
+    if (product.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+        return res.status(403).render('error', { message: 'Not authorized to edit this product' });
+    }
+
+    const categories = await Category.find();
+
+    res.render('products/add-product', { 
+        pageTitle: 'Edit Product',
+        path: '/admin/edit-product',
+        editing: true,
+        product: product,
+        categories: categories,
+        userInput: product,
+        message: null 
+    });
+
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ 
-        status: 'error', 
-        message: err.message 
+    res.status(500).render('error', { 
+      message: err.message 
     });
   }
 };
 
+// 5. POST: Update Product (Admin/Owner)
 exports.updateProduct = async (req, res) => {
   try {
     const updates = {};
     const allowed = ['name', 'description', 'price', 'quantity', 'category'];
-
     allowed.forEach(key => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
 
     if (updates.category && !mongoose.Types.ObjectId.isValid(updates.category)) {
-      return res.status(400).json({
-        status: 'fail',
-        data: { message: 'Invalid category id' }
-      });
+      res.status(400).render('error', { 
+      message: 'Category ID is invalid' 
+    });
     }
 
     // If a new file is uploaded, we need to delete old image later
@@ -147,15 +177,13 @@ exports.updateProduct = async (req, res) => {
       // If product not found and we uploaded an image, delete the new upload to avoid orphan files
       if (newImage) {
         fs.unlink(
-          path.join(__dirname, '../../uploads/productImages', newImage),
-          () => {}
+          path.join(__dirname, '../../uploads/productImages', newImage),() => { }
         );
       }
 
-      return res.status(404).json({
-        status: 'fail',
-        data: { message: 'Product not found' }
-      });
+      return res.status(404).render('error',{ 
+        message: 'Product not found' 
+      })
     }
 
     // If new image exists, set the update value
@@ -175,27 +203,22 @@ exports.updateProduct = async (req, res) => {
       if (fs.existsSync(oldImagePath)) {
         fs.unlink(oldImagePath, (err) => {
           if (err) {
-            return res.status(400).json({ 
-                status: 'fail', 
-                data: { 
-                    message: 'Error deleting image' 
-                } 
-            });
+            return res.status(400).render('error', {
+                message: 'Error deleting image'
+              })
           }
         });
       }
     }
 
-    return res.status(200).json({
-      status: 'success',
-      data: { product: updatedProduct }
-    });
+    return res.status(200).render('product', { 
+      product: updatedProduct 
+    })
 
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      status: 'error',
-      message: err.message
+    res.status(500).render('error', { 
+      message: err.message 
     });
   }
 };
@@ -204,13 +227,9 @@ exports.updateProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) return res.status(404).json({ 
-        status: 'fail', 
-        data: { 
-            message: 'Product not found' 
-        } 
-    });
-
+    if (!product) return res.status(404).render('error', {
+        message: 'Product not found'
+      })
     if (product.image) {
       const imagePath = path.join(__dirname, '../../uploads/productImages', product.image);
 
@@ -218,28 +237,19 @@ exports.deleteProduct = async (req, res) => {
       if (fs.existsSync(imagePath)) {
         fs.unlink(imagePath, (err) => {
           if (err) {
-            return res.status(400).json({ 
-                status: 'fail', 
-                data: { 
-                    message: 'Error deleting image' 
-                } 
-            });
+            return res.status(400).render('error', {
+                message: 'Error deleting image'
+              });
           }
         });
       }
     }
 
-    return res.status(200).json({ 
-        status: 'success', 
-        data: { 
-            message: 'Product deleted' 
-        } 
-    });
+    return res.status(200).render('shop')
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ 
-        status: 'error', 
-        message: err.message 
+    res.status(500).render('error', { 
+      message: err.message 
     });
   }
 };

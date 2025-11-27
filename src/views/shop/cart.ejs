@@ -176,14 +176,14 @@
                             <!-- Shipping -->
                             <div class="d-flex justify-content-between">
                                 <h5 class="mb-0 me-4">Shipping:</h5>
-                                <p class="mb-0">$<%= cart.calculation.shipping.toFixed(2) %></p>
+                                <p class="mb-0">$<%= cart.calculation?.shipping.toFixed(2) %></p>
                             </div>
                         </div>
 
                         <!-- Total -->
                         <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                             <h5 class="mb-0 ps-4 me-4">Total</h5>
-                            <p class="mb-0 pe-4">$<%= cart.calculation.total.toFixed(2) %></p>
+                            <p class="mb-0 pe-4">$<%= cart.calculation?.total.toFixed(2) %></p>
                         </div>
 
                         <button class="btn btn-primary rounded-pill px-4 py-3 text-uppercase mb-4 ms-4"

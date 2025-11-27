@@ -10,7 +10,7 @@ exports.register = async (req, res) => {
 
     const exists = await User.findOne({ email: data.email });
     if (exists) {
-      return res.status(400).render('/register', { 
+      return res.status(400).render('auth/register', { 
         message: "Email already registered",
         userInput: req.body // Send back input so they don't have to re-type everything
       });
@@ -54,7 +54,7 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ email: data.email });
     if (!user) {
-      return res.status(401).render('/login', { 
+      return res.status(401).render('auth/login', { 
         message: "Invalid email or password",
         userInput: { email: data.email }
       });
@@ -63,7 +63,7 @@ exports.login = async (req, res) => {
     // 3. CHECK PASSWORD
     const valid = await bcrypt.compare(data.password, user.password);
     if (!valid) {
-      return res.status(401).render('/login', { 
+      return res.status(401).render('auth/login', { 
         message: "Invalid email or password", // Same message for security
         userInput: { email: data.email }
       });
