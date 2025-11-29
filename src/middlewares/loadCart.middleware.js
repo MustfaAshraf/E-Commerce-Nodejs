@@ -3,82 +3,86 @@ const Cart = require("../models/cart.model");
 
 module.exports = async (req, res, next) => {
   try {
-    // If user is not logged in, skip silently
-    if (!req.user || !req.user.id) {
-      res.locals.cart = null;
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    if (!req.user || !userId) {
+      // Create a "Dummy" cart so EJS doesn't crash on "cart.calculation"
+      res.locals.cart = {
+        items: [],
+        calculation: { subtotal: 0, shipping: 0, discount: 0, total: 0 }
+      };
       return next();
     }
 
-    const userId = new mongoose.Types.ObjectId(req.user.id);
-
+    // 2. Fetch Cart
     const cart = await Cart.findOne({ userId })
       .populate("items.productId")
-      .populate("coupon"); // populate coupon object too
+      .populate("coupon");
 
+    // 3. Handle Empty Cart from DB
     if (!cart) {
-      res.locals.cart = null;
+      res.locals.cart = {
+        items: [],
+        calculation: { subtotal: 0, shipping: 0, discount: 0, total: 0 }
+      };
       return next();
     }
 
-    // -----------------------------
-    //    PRICE CALCULATIONS
-    // -----------------------------
+    // 4. Filter "Ghost" Items (Products deleted from DB but still in Cart)
+    // This prevents EJS from crashing when accessing "item.productId.name"
+    cart.items = cart.items.filter(item => item.productId != null);
 
-    // 1) SUBTOTAL
+    // -----------------------------
+    //    CALCULATE NUMBERS
+    // -----------------------------
     let subtotal = 0;
-    for (const item of cart.items) {
-      if (item.productId) {
+    
+    cart.items.forEach(item => {
         subtotal += item.productId.price * item.quantity;
-      }
-    }
+    });
 
-    // 2) SHIPPING (static for now)
-    const shipping = 100;
+    // Shipping Rule: 100 if items exist, else 0
+    const shipping = cart.items.length > 0 ? 100 : 0;
 
-    // 3) COUPON DISCOUNT
+    // Coupon Logic
     let discount = 0;
-
-    if (cart.coupon) {
+    if (cart.coupon && cart.items.length > 0) {
       const c = cart.coupon;
-
-      const expired = c.expiresAt < new Date();
-      const inactive = !c.isActive;
-
-      if (!expired && !inactive) {
-        if (c.discountType === "percentage") {
-          discount = (subtotal * c.discountValue) / 100;
-        } else if (c.discountType === "fixed") {
-          discount = c.discountValue;
-        }
-
-        // avoid negative totals
-        if (discount > subtotal) discount = subtotal;
+      // Simple date check
+      if (c.isActive && new Date() < c.expiresAt) {
+         if (c.discountType === 'percentage') {
+             discount = (subtotal * c.discountValue) / 100;
+         } else if (c.discountType === 'fixed') {
+             discount = c.discountValue;
+         }
+         // Prevent negative total
+         if (discount > subtotal) discount = subtotal;
       }
     }
-    // 4) TOTAL
-    const total = subtotal - discount + shipping;
 
-    // Expose everything to EJS
+    const total = subtotal + shipping - discount;
+
+    // 5. Expose structure EXACTLY as EJS expects it
     res.locals.cart = {
-      ...cart.toObject(),
+      _id: cart._id,
+      items: cart.items, // The filtered list
+      coupon: cart.coupon,
       calculation: {
-        subtotal,
-        shipping,
-        discount,
-        total
+        subtotal: subtotal,
+        shipping: shipping,
+        discount: discount,
+        total: total
       }
     };
 
-    return next();
+    next();
 
   } catch (err) {
-
-    res.locals.cart = null;
-    // JSend for API endpoints only
-      return res.status(500).json({
-        status: "error",
-        data: { error: err.message }
-      });
-
+    console.error("Cart Middleware Error:", err);
+    // Fallback on error to prevent white screen
+    res.locals.cart = {
+        items: [],
+        calculation: { subtotal: 0, shipping: 0, discount: 0, total: 0 }
+    };
+    next();
   }
 };

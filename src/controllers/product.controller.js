@@ -82,9 +82,9 @@ exports.getProducts = async (req, res) => {
       .sort({ createdAt: -1 });
 
     const totalProducts = await Product.countDocuments(filter);
-
+    console.log('products ->', products);
     // Render the Shop View
-    return res.render('/shop', {
+    return res.render('shop/shop', {
       pageTitle: 'Shop',
       products: products,
       currentPage: page,

@@ -2,76 +2,68 @@ const Cart = require("../models/cart.model");
 const Coupon = require('../models/coupon.model');
 const Product = require("../models/product.model");
 const mongoose = require("mongoose");
+const { matchedData } = require('express-validator');
 
 exports.getCart = async (req, res) => {
-  try {
-    const cart = res.locals.cart;
-    return res.render("shop/cart.ejs", {
-      cart: cart || { items: [] },
-      couponStatus: req.query.coupon
-    });
+  
+  const cart = res.locals.cart;
 
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send(err.message);
-  }
+  res.render("shop/cart", {
+    pageTitle: 'My Cart',
+    // If cart is null, send a dummy structure to prevent EJS errors
+    cart: cart,
+    couponStatus: req.query.coupon, // 'valid', 'invalid', 'error'
+    message: null
+  });
 };
 
 exports.addToCart = async (req, res) => {
   try {
-    const userId = new mongoose.Types.ObjectId(req.user.id);;
-    const { productId, quantity = 1 } = req.body;
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    const data = matchedData(req); 
+    const productId = data.productId || req.body.productId;
+    const quantity = parseInt(data.quantity || req.body.quantity || 1);
 
-    // validate product id
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({
-        status: "fail",
-        data: { message: "Invalid product id" }
-      });
-    }
+    // 2. Check Stock
+    const product = await Product.findById(productId);
+    if (!product) return res.redirect('/?error=ProductNotFound');
 
-    // ensure product exists
-    const productExists = await Product.findById(productId);
-    if (!productExists) {
-      return res.status(404).json({
-        status: "fail",
-        data: { message: "Product not found" }
-      });
-    }
-
-    // find or create cart
+    // 3. Update Cart
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
-      cart = await Cart.create({
+      // Create new
+      if (quantity > product.quantity) return res.redirect('/products/' + productId + '?error=OutOfStock');
+      
+      await Cart.create({
         userId,
         items: [{ productId, quantity }]
       });
-    } else {
-      // check if product already exists in cart
-      const index = cart.items.findIndex(
-        (item) => item.productId.toString() === productId
-      );
 
-      if (index >= 0) {
-        cart.items[index].quantity += Number(quantity);
+    } else {
+      // Update existing
+      const itemIndex = cart.items.findIndex(p => p.productId.toString() === productId);
+
+      if (itemIndex > -1) {
+        const newQty = cart.items[itemIndex].quantity + quantity;
+        if (newQty > product.quantity) return res.redirect('/products/' + productId + '?error=OutOfStock');
+        
+        cart.items[itemIndex].quantity = newQty;
       } else {
+        if (quantity > product.quantity) return res.redirect('/products/' + productId + '?error=OutOfStock');
+        
         cart.items.push({ productId, quantity });
       }
-
+      
       await cart.save();
     }
 
-    return res.status(200).json({
-      status: "success",
-      data: { cart }
-    });
+    // 4. Redirect (Success)
+    res.redirect('/my/cart');
+
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      status: "error",
-      message: err.message
-    });
+    res.redirect('/?error=AddToCartFailed');
   }
 };
 
