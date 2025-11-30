@@ -46,6 +46,7 @@ app.use(require('./src/middlewares/loadCategories.middleware'));
 
 app.use((req, res, next) => {
     res.locals.user = req.user || null;
+    res.locals.query = req.query || null;
     next();
 });
 

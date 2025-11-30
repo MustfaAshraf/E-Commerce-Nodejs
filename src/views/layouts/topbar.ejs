@@ -26,37 +26,66 @@
             </div>
         </div>
 
-        <!-- Right Section (Login / Register OR User Area) -->
+        <!-- Right Section -->
         <div class="col-md-4 col-lg-3 text-center text-lg-end">
             <div class="d-inline-flex align-items-center">
 
                 <% if (!isAuthenticated) { %>
-                    <a href="/login"
-                        class="text-muted d-flex align-items-center justify-content-center me-2">
-                        <span class="rounded-pill border px-4 py-2 fw-semibold">
-                            Login
-                        </span>
+                    <!-- Guest View -->
+                    <a href="/login" class="text-muted d-flex align-items-center justify-content-center me-2">
+                        <span class="rounded-pill border px-4 py-2 fw-semibold">Login</span>
                     </a>
-
-                    <a href="/register"
-                        class="text-muted d-flex align-items-center justify-content-center">
-                        <span class="rounded-pill border px-4 py-2 fw-semibold text-primary">
-                            Sign Up
-                        </span>
+                    <a href="/register" class="text-muted d-flex align-items-center justify-content-center">
+                        <span class="rounded-pill border px-4 py-2 fw-semibold text-primary">Sign Up</span>
                     </a>
 
                 <% } else { %>
-                    <!-- Logged-in content goes here -->
-                    <a href="/profile" class="text-muted me-3">
+                    <!-- Logged In View -->
+                    
+                    <!-- 1. User Profile -->
+                    <a href="/profile" class="text-muted me-3" title="My Profile">
                         <span class="rounded-circle btn-md-square border">
                             <i class="fas fa-user"></i>
                         </span>
                     </a>
-                    <a href="/auth/logout" class="text-muted">
+
+                    <!-- 2. CART ICON (New) -->
+                    <!-- position-relative is needed so the badge knows where to stick -->
+                    <a href="/my/cart" class="position-relative me-3 text-muted" title="View Cart">
+                        <span class="rounded-circle btn-md-square border">
+                            <i class="fas fa-shopping-bag"></i>
+                        </span>
+                        
+                        <!-- The Badge Count -->
+                        <!-- We check if cartCount exists (from middleware) -->
+                        <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                  style="border: 2px solid white;">
+                                <%= cartCount %>
+                            </span>
+                        <% } else { %>
+                            <!-- Optional: Show 0 if empty -->
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" 
+                                  style="border: 2px solid white;">0</span>
+                        <% } %>
+                    </a>
+
+                    <!-- 3. Logout -->
+                    <a href="/auth/logout" class="text-muted" title="Logout">
                         <span class="rounded-circle btn-md-square border">
                             <i class="fas fa-sign-out-alt"></i>
                         </span>
                     </a>
+                    
+                    <!-- Optional: Show Price next to icons -->
+                    <!-- 
+                    <% if (typeof cart !== 'undefined' && cart && cart.calculation) { %>
+                        <div class="d-flex flex-column text-start ms-2">
+                            <small class="text-muted" style="font-size: 10px;">Total</small>
+                            <span class="fw-bold" style="font-size: 14px;">$<%= cart.calculation.total.toFixed(2) %></span>
+                        </div>
+                    <% } %> 
+                    -->
                 <% } %>
 
             </div>
