@@ -65,39 +65,88 @@ exports.createProduct = async (req, res) => {
 // 3. GET: Show All Products (Shop Page)
 exports.getProducts = async (req, res) => {
   try {
-    // Simple Filter & Pagination
-    const page = +req.query.page || 1;
-    const limit = 9; // Show 9 products per page
+    // 1. FILTERING LOGIC
+    // ------------------
+    const filter = {};
+
+    // A. Search by Name (Case insensitive)
+    if (req.query.search) {
+        filter.name = { $regex: req.query.search, $options: 'i' };
+    }
+
+    // B. Filter by Category
+    if (req.query.category) {
+        filter.category = req.query.category;
+    }
+
+    // C. Filter by Price Range
+    if (req.query.minPrice || req.query.maxPrice) {
+        filter.price = {};
+        if (req.query.minPrice) filter.price.$gte = Number(req.query.minPrice);
+        if (req.query.maxPrice) filter.price.$lte = Number(req.query.maxPrice);
+    }
+
+    // 2. SORTING LOGIC
+    // ----------------
+    let sort = { createdAt: -1 }; // Default: Newest first
+
+    if (req.query.sort === 'price_asc') {
+        sort = { price: 1 }; // Low to High
+    } else if (req.query.sort === 'price_desc') {
+        sort = { price: -1 }; // High to Low
+    } else if (req.query.sort === 'newest') {
+        sort = { createdAt: -1 };
+    }
+
+    // 3. PAGINATION LOGIC
+    // -------------------
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9; // 9 products per page (fits 3x3 grid)
     const skip = (page - 1) * limit;
 
-    const filter = {};
-    if (req.query.category) filter.category = req.query.category;
-    if (req.query.search) filter.name = { $regex: req.query.search, $options: 'i' };
+    // 4. DATABASE QUERIES (Parallel for speed)
+    // ----------------------------------------
+    // We need:
+    // a) The products (filtered, sorted, paginated)
+    // b) The total count (for pagination buttons)
+    // c) The categories (for the sidebar list)
+    
+    const [products, totalProducts, categories] = await Promise.all([
+        Product.find(filter)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .populate('category'),
+        
+        Product.countDocuments(filter),
+        
+        Category.find().sort({ name: 1 }) // Fetch categories for the sidebar
+    ]);
 
-    // Fetch Products & Count
-    const products = await Product.find(filter)
-      .populate('category') // So we can show "Shoes" instead of ID
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
-
-    const totalProducts = await Product.countDocuments(filter);
-    console.log('products ->', products);
-    // Render the Shop View
-    return res.render('shop/shop', {
-      pageTitle: 'Shop',
-      products: products,
-      currentPage: page,
-      hasNextPage: limit * page < totalProducts,
-      hasPreviousPage: page > 1,
-      nextPage: page + 1,
-      previousPage: page - 1,
-      lastPage: Math.ceil(totalProducts / limit)
+    // 5. RENDER VIEW
+    // --------------
+    res.render('products/shop', {
+        pageTitle: 'Shop',
+        
+        // Data
+        products: products,
+        categories: categories, // Needed for Sidebar Loop
+        
+        // Pagination Math
+        currentPage: page,
+        hasNextPage: (limit * page) < totalProducts,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalProducts / limit),
+        
+        // Pass query back so filters stick (e.g. minPrice stays in input)
+        query: req.query 
     });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).render('error', { message: 'Could not load products' });
+    console.error("Get Products Error:", err);
+    res.status(500).render('error', { message: 'Could not load products' });
   }
 };
 

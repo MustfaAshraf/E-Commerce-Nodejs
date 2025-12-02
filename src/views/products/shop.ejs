@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <%- include('../layouts/head') %>
+
+<body>
+
+    <%- include('../layouts/spinner') %>
+    <%- include('../layouts/topbar') %>
+    <%- include('../layouts/navbar') %>
+
+    <!-- Single Page Header start -->
+    <div class="container-fluid page-header py-5">
+        <h1 class="text-center text-white display-6 wow fadeInUp" data-wow-delay="0.1s">Shop Page</h1>
+    </div>
+    <!-- Single Page Header End -->
+
+    <!-- Services Start (Static) -->
+    <div class="container-fluid px-0">
+        <div class="row g-0">
+            <div class="col-6 col-md-4 col-lg-2 border-start border-end wow fadeInUp" data-wow-delay="0.1s">
+                <div class="p-4">
+                    <div class="d-inline-flex align-items-center">
+                        <i class="fa fa-sync-alt fa-2x text-primary"></i>
+                        <div class="ms-4">
+                            <h6 class="text-uppercase mb-2">Free Return</h6>
+                            <p class="mb-0">30 days money back guarantee!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 border-end wow fadeInUp" data-wow-delay="0.2s">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fab fa-telegram-plane fa-2x text-primary"></i>
+                        <div class="ms-4">
+                            <h6 class="text-uppercase mb-2">Free Shipping</h6>
+                            <p class="mb-0">Free shipping on all order</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 border-end wow fadeInUp" data-wow-delay="0.3s">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-life-ring fa-2x text-primary"></i>
+                        <div class="ms-4">
+                            <h6 class="text-uppercase mb-2">Support 24/7</h6>
+                            <p class="mb-0">We support online 24 hrs a day</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 border-end wow fadeInUp" data-wow-delay="0.4s">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-credit-card fa-2x text-primary"></i>
+                        <div class="ms-4">
+                            <h6 class="text-uppercase mb-2">Receive Gift Card</h6>
+                            <p class="mb-0">Recieve gift all over oder $50</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 border-end wow fadeInUp" data-wow-delay="0.5s">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-lock fa-2x text-primary"></i>
+                        <div class="ms-4">
+                            <h6 class="text-uppercase mb-2">Secure Payment</h6>
+                            <p class="mb-0">We Value Your Security</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 border-end wow fadeInUp" data-wow-delay="0.6s">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-blog fa-2x text-primary"></i>
+                        <div class="ms-4">
+                            <h6 class="text-uppercase mb-2">Online Service</h6>
+                            <p class="mb-0">Free return products in 30 days</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Services End -->
+
+    <!-- Products Offer Start (Static) -->
+    <div class="container-fluid bg-light py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-6 wow fadeInLeft" data-wow-delay="0.2s">
+                    <a href="#" class="d-flex align-items-center justify-content-between border bg-white rounded p-4">
+                        <div>
+                            <p class="text-muted mb-3">Find The Best Camera for You!</p>
+                            <h3 class="text-primary">Smart Camera</h3>
+                            <h1 class="display-3 text-secondary mb-0">40% <span class="text-primary fw-normal">Off</span></h1>
+                        </div>
+                        <img src="img/product-1.png" class="img-fluid" alt="">
+                    </a>
+                </div>
+                <div class="col-lg-6 wow fadeInRight" data-wow-delay="0.3s">
+                    <a href="#" class="d-flex align-items-center justify-content-between border bg-white rounded p-4">
+                        <div>
+                            <p class="text-muted mb-3">Find The Best Watches for You!</p>
+                            <h3 class="text-primary">Smart Watch</h3>
+                            <h1 class="display-3 text-secondary mb-0">20% <span class="text-primary fw-normal">Off</span></h1>
+                        </div>
+                        <img src="img/product-2.png" class="img-fluid" alt="">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Products Offer End -->
+
+
+    <!-- Shop Page Start -->
+    <div class="container-fluid shop py-5">
+        <div class="container py-5">
+            <div class="row g-4">
+                
+                <!-- ============================
+                     SIDEBAR (Col-3)
+                ============================= -->
+                <div class="col-lg-3 wow fadeInUp" data-wow-delay="0.1s">
+                    
+                    <!-- 1. Categories Filter -->
+                    <div class="product-categories mb-4">
+                        <h4>Products Categories</h4>
+                        <ul class="list-unstyled">
+                            <li>
+                                <div class="categories-item">
+                                    <a href="/products" class="text-dark <%= !query.category ? 'fw-bold text-primary' : '' %>">
+                                        <i class="fas fa-th-large me-2"></i> All Products
+                                    </a>
+                                </div>
+                            </li>
+                            <% if (categories && categories.length) { %>
+                                <% categories.forEach(cat => { %>
+                                    <li>
+                                        <div class="categories-item">
+                                            <a href="/products?category=<%= cat._id %>" class="text-dark <%= (query.category == cat._id) ? 'fw-bold text-primary' : '' %>">
+                                                <i class="fas fa-angle-right me-2"></i> <%= cat.name %>
+                                            </a>
+                                            <!-- Optional: Show count if you aggregate it later <span>(3)</span> -->
+                                        </div>
+                                    </li>
+                                <% }) %>
+                            <% } %>
+                        </ul>
+                    </div>
+
+                    <!-- 2. Price Filter -->
+                    <div class="price mb-4">
+                        <h4 class="mb-2">Price</h4>
+                        <form action="/products" method="GET">
+                            <!-- Preserve other filters -->
+                            <% if(query.category) { %><input type="hidden" name="category" value="<%= query.category %>"><% } %>
+                            <% if(query.search) { %><input type="hidden" name="search" value="<%= query.search %>"><% } %>
+
+                            <input type="range" class="form-range w-100" id="rangeInput" name="maxPrice" min="0" max="2000"
+                                value="<%= query.maxPrice || 2000 %>" oninput="amount.value=rangeInput.value">
+                            <output id="amount" name="amount" min-velue="0" max-value="2000" for="rangeInput"><%= query.maxPrice || 2000 %></output>
+                            <button type="submit" class="btn btn-primary btn-sm ms-2">Filter</button>
+                        </form>
+                    </div>
+
+                    <!-- 3. Sidebar Banner (Static) -->
+                    <a href="#">
+                        <div class="position-relative mb-4">
+                            <img src="img/product-banner-2.jpg" class="img-fluid w-100 rounded" alt="Image">
+                            <div class="text-center position-absolute d-flex flex-column align-items-center justify-content-center rounded p-4"
+                                style="width: 100%; height: 100%; top: 0; right: 0; background: rgba(242, 139, 0, 0.3);">
+                                <h5 class="display-6 text-primary">SALE</h5>
+                                <h4 class="text-secondary">Get UP To 50% Off</h4>
+                                <a href="#" class="btn btn-primary rounded-pill px-4">Shop Now</a>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 4. Tags (Static) -->
+                    <div class="product-tags py-4">
+                        <h4 class="mb-3">PRODUCT TAGS</h4>
+                        <div class="product-tags-items bg-light rounded p-3">
+                            <a href="#" class="border rounded py-1 px-2 mb-2">New</a>
+                            <a href="#" class="border rounded py-1 px-2 mb-2">Brand</a>
+                            <a href="#" class="border rounded py-1 px-2 mb-2">Phone</a>
+                            <a href="#" class="border rounded py-1 px-2 mb-2">Sales</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================
+                     MAIN CONTENT (Col-9)
+                ============================= -->
+                <div class="col-lg-9 wow fadeInUp" data-wow-delay="0.1s">
+                    
+                    <!-- Top Banner -->
+                    <div class="rounded mb-4 position-relative">
+                        <img src="img/product-banner-3.jpg" class="img-fluid rounded w-100" style="height: 250px;" alt="Image">
+                        <div class="position-absolute rounded d-flex flex-column align-items-center justify-content-center text-center"
+                            style="width: 100%; height: 250px; top: 0; left: 0; background: rgba(242, 139, 0, 0.3);">
+                            <h4 class="display-5 text-primary">SALE</h4>
+                            <h3 class="display-4 text-white mb-4">Get UP To 50% Off</h3>
+                            <a href="#" class="btn btn-primary rounded-pill">Shop Now</a>
+                        </div>
+                    </div>
+
+                    <!-- Tool Bar (Search, Sort, Tab Toggle) -->
+                    <div class="row g-4 mb-4">
+                        <!-- Search -->
+                        <div class="col-xl-7">
+                            <form action="/products" method="GET" class="input-group w-100 mx-auto d-flex">
+                                <% if(query.category) { %><input type="hidden" name="category" value="<%= query.category %>"><% } %>
+                                <input type="search" name="search" class="form-control p-3" placeholder="Search keywords..." value="<%= query.search || '' %>">
+                                <button type="submit" class="input-group-text p-3"><i class="fa fa-search"></i></button>
+                            </form>
+                        </div>
+                        
+                        <!-- Sort -->
+                        <div class="col-xl-3 text-end">
+                            <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between align-items-center">
+                                <label for="electronics" class="me-2">Sort By:</label>
+                                <form action="/products" method="GET" id="sortForm">
+                                    <% if(query.category) { %><input type="hidden" name="category" value="<%= query.category %>"><% } %>
+                                    <% if(query.search) { %><input type="hidden" name="search" value="<%= query.search %>"><% } %>
+                                    
+                                    <select id="electronics" name="sort" class="border-0 form-select-sm bg-light" onchange="document.getElementById('sortForm').submit()">
+                                        <option value="newest" <%= !query.sort || query.sort == 'newest' ? 'selected' : '' %>>Newest</option>
+                                        <option value="price_asc" <%= query.sort == 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+                                        <option value="price_desc" <%= query.sort == 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Tab Toggles -->
+                        <div class="col-lg-4 col-xl-2">
+                            <ul class="nav nav-pills d-inline-flex text-center py-2 px-2 rounded bg-light">
+                                <li class="nav-item me-4">
+                                    <a class="bg-light active" data-bs-toggle="pill" href="#tab-5">
+                                        <i class="fas fa-th fa-3x text-primary"></i>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="bg-light" data-bs-toggle="pill" href="#tab-6">
+                                        <i class="fas fa-bars fa-3x text-primary"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Products Tab Content -->
+                    <div class="tab-content">
+                        
+                        <!-- ----------------------------
+                             VIEW 1: GRID VIEW (Tab 5)
+                        ----------------------------- -->
+                        <div id="tab-5" class="tab-pane fade show p-0 active">
+                            <div class="row g-4">
+                                <% if (products.length > 0) { %>
+                                    <% products.forEach(product => { %>
+                                        <div class="col-md-6 col-lg-6 col-xl-4">
+                                            <div class="product-item rounded">
+                                                <div class="product-item-inner border rounded">
+                                                    <div class="product-item-inner-item">
+                                                        <img src="/uploads/productImages/<%= product.image %>" class="img-fluid w-100 rounded-top" alt="" style="height: 250px; object-fit: cover;">
+                                                        
+                                                        <!-- New Badge (7 days logic) -->
+                                                        <% if ((new Date() - new Date(product.createdAt)) < (7 * 24 * 60 * 60 * 1000)) { %>
+                                                            <div class="product-new">New</div>
+                                                        <% } %>
+
+                                                        <div class="product-details">
+                                                            <a href="/products/<%= product._id %>"><i class="fa fa-eye fa-1x"></i></a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center rounded-bottom p-4">
+                                                        <a href="/products/<%= product._id %>" class="d-block h5 mb-2 text-truncate"><%= product.name %></a>
+                                                        <span class="text-primary fs-5">$<%= product.price.toFixed(2) %></span>
+                                                    </div>
+                                                </div>
+                                                <div class="product-item-add border border-top-0 rounded-bottom text-center p-4 pt-0">
+                                                    <form action="/my/cart/add" method="POST">
+                                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                                        <button type="submit" class="btn btn-primary border-secondary rounded-pill py-2 px-4 mb-4">
+                                                            <i class="fas fa-shopping-cart me-2"></i> Add To Cart
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                <% } else { %>
+                                    <div class="col-12 text-center py-5">
+                                        <h3>No products found.</h3>
+                                    </div>
+                                <% } %>
+                                
+                                <!-- Grid Pagination -->
+                                <div class="col-12">
+                                    <div class="pagination d-flex justify-content-center mt-5">
+                                        <% if (hasPreviousPage) { %>
+                                            <a href="/products?page=<%= previousPage %>&category=<%= query.category || '' %>&search=<%= query.search || '' %>&sort=<%= query.sort || '' %>" class="rounded">&laquo;</a>
+                                        <% } %>
+                                        
+                                        <% for(let i = 1; i <= lastPage; i++) { %>
+                                            <a href="/products?page=<%= i %>&category=<%= query.category || '' %>&search=<%= query.search || '' %>&sort=<%= query.sort || '' %>" class="rounded <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+                                        <% } %>
+                                        
+                                        <% if (hasNextPage) { %>
+                                            <a href="/products?page=<%= nextPage %>&category=<%= query.category || '' %>&search=<%= query.search || '' %>&sort=<%= query.sort || '' %>" class="rounded">&raquo;</a>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ----------------------------
+                             VIEW 2: LIST VIEW (Tab 6)
+                        ----------------------------- -->
+                        <div id="tab-6" class="products tab-pane fade show p-0">
+                            <div class="row g-4 products-mini">
+                                <% if (products.length > 0) { %>
+                                    <% products.forEach(product => { %>
+                                        <div class="col-lg-6">
+                                            <div class="products-mini-item border">
+                                                <div class="row g-0">
+                                                    <div class="col-5">
+                                                        <div class="products-mini-img border-end h-100 position-relative">
+                                                            <img src="/uploads/productImages/<%= product.image %>" class="img-fluid w-100 h-100" alt="" style="object-fit: cover;">
+                                                            
+                                                            <div class="products-mini-icon rounded-circle bg-primary">
+                                                                <a href="/products/<%= product._id %>"><i class="fa fa-eye fa-1x text-white"></i></a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-7">
+                                                        <div class="products-mini-content p-3">
+                                                            <a href="/products/<%= product._id %>" class="d-block h5 mb-2"><%= product.name %></a>
+                                                            <span class="text-primary fs-5">$<%= product.price.toFixed(2) %></span>
+                                                            <p class="text-muted mt-2 small">
+                                                                <%= product.description ? product.description.substring(0, 50) + '...' : '' %>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="products-mini-add border p-3">
+                                                    <form action="/my/cart/add" method="POST" class="d-inline">
+                                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                                        <button type="submit" class="btn btn-primary border-secondary rounded-pill py-2 px-4">
+                                                            <i class="fas fa-shopping-cart me-2"></i> Add To Cart
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                <% } %>
+
+                                <!-- List Pagination (Same Logic) -->
+                                <div class="col-12">
+                                    <div class="pagination d-flex justify-content-center mt-5">
+                                        <% if (hasPreviousPage) { %>
+                                            <a href="/products?page=<%= previousPage %>&category=<%= query.category || '' %>&search=<%= query.search || '' %>&sort=<%= query.sort || '' %>" class="rounded">&laquo;</a>
+                                        <% } %>
+                                        
+                                        <% for(let i = 1; i <= lastPage; i++) { %>
+                                            <a href="/products?page=<%= i %>&category=<%= query.category || '' %>&search=<%= query.search || '' %>&sort=<%= query.sort || '' %>" class="rounded <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+                                        <% } %>
+                                        
+                                        <% if (hasNextPage) { %>
+                                            <a href="/products?page=<%= nextPage %>&category=<%= query.category || '' %>&search=<%= query.search || '' %>&sort=<%= query.sort || '' %>" class="rounded">&raquo;</a>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Tab Content -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Shop Page End -->
+
+    <!-- Product Banner Start (Bottom) -->
+    <div class="container-fluid py-5">
+        <div class="container pb-5">
+            <div class="row g-4">
+                <div class="col-lg-6 wow fadeInLeft" data-wow-delay="0.1s">
+                    <a href="#">
+                        <div class="bg-primary rounded position-relative">
+                            <img src="img/product-banner.jpg" class="img-fluid w-100 rounded" alt="">
+                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center rounded p-4"
+                                style="background: rgba(255, 255, 255, 0.5);">
+                                <h3 class="display-5 text-primary">EOS Rebel <br> <span>T7i Kit</span></h3>
+                                <p class="fs-4 text-muted">$899.99</p>
+                                <a href="#" class="btn btn-primary rounded-pill align-self-start py-2 px-4">Shop Now</a>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6 wow fadeInRight" data-wow-delay="0.2s">
+                    <a href="#">
+                        <div class="text-center bg-primary rounded position-relative">
+                            <img src="img/product-banner-2.jpg" class="img-fluid w-100" alt="">
+                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center rounded p-4"
+                                style="background: rgba(242, 139, 0, 0.5);">
+                                <h2 class="display-2 text-secondary">SALE</h2>
+                                <h4 class="display-5 text-white mb-4">Get UP To 50% Off</h4>
+                                <a href="#" class="btn btn-secondary rounded-pill align-self-center py-2 px-4">Shop Now</a>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Product Banner End -->
+
+    <%- include('../layouts/footer') %>
+    <%- include('../layouts/copyright') %>
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-primary btn-lg-square back-to-top"><i class="fa fa-arrow-up"></i></a>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/lib/wow/wow.min.js"></script>
+    <script src="/lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+
+</html>
