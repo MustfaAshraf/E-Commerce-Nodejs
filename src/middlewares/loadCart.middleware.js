@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
       // Create a "Dummy" cart so EJS doesn't crash on "cart.calculation"
       res.locals.cart = {
         items: [],
-        calculation: { subtotal: 0, shipping: 0, discount: 0, total: 0 }
+        calculation: { subtotal: 0, cartCount: 0, shipping: 0, discount: 0, total: 0 }
       };
       return next();
     }
@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
     if (!cart) {
       res.locals.cart = {
         items: [],
-        calculation: { subtotal: 0, shipping: 0, discount: 0, total: 0 }
+        calculation: { subtotal: 0, cartCount: 0, shipping: 0, discount: 0, total: 0 }
       };
       return next();
     }
@@ -35,9 +35,11 @@ module.exports = async (req, res, next) => {
     //    CALCULATE NUMBERS
     // -----------------------------
     let subtotal = 0;
+    let count = 0;
     
     cart.items.forEach(item => {
         subtotal += item.productId.price * item.quantity;
+        count += item.quantity;
     });
 
     // Shipping Rule: 100 if items exist, else 0
@@ -68,6 +70,7 @@ module.exports = async (req, res, next) => {
       coupon: cart.coupon,
       calculation: {
         subtotal: subtotal,
+        cartCount: count,
         shipping: shipping,
         discount: discount,
         total: total
@@ -81,7 +84,7 @@ module.exports = async (req, res, next) => {
     // Fallback on error to prevent white screen
     res.locals.cart = {
         items: [],
-        calculation: { subtotal: 0, shipping: 0, discount: 0, total: 0 }
+        calculation: { subtotal: 0, cartCount: 0, shipping: 0, discount: 0, total: 0 }
     };
     next();
   }

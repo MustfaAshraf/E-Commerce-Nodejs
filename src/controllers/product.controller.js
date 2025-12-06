@@ -153,18 +153,36 @@ exports.getProducts = async (req, res) => {
 // 4. GET: Show Single Product Details
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category').populate('owner', 'name'); // Show owner name?
+    const productId = req.params.id;
 
+    // 1. Fetch the Current Product
+    const product = await Product.findById(productId).populate('category');
+    
     if (!product) {
-      return res.status(404).render('error', { message: 'Product not found' });
+        return res.status(404).render('error', { message: 'Product not found' });
     }
 
-    return res.render('shop/single', {
-      pageTitle: product.name,
-      product: product
+    // 2. Fetch Categories (For Sidebar)
+    const categories = await Category.find().sort({ name: 1 });
+
+    // 3. Fetch Related Products
+    // Logic: Same Category, NOT the current ID, Limit to 6 items
+    const relatedProducts = await Product.find({
+        category: product.category._id,
+        _id: { $ne: productId } // Exclude current product
+    }).limit(6);
+
+    // 4. Render View
+    return res.render('products/single', { 
+        pageTitle: product.name,
+        product: product,
+        categories: categories,
+        relatedProducts: relatedProducts, // <--- Sent to view
+        query: req.query 
     });
 
   } catch (err) {
+    console.error(err);
     return res.status(500).render('error', { message: err.message });
   }
 };

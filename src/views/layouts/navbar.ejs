@@ -3,29 +3,28 @@
         <div class="row gx-0 bg-primary px-5 align-items-center">
             <div class="col-lg-3 d-none d-lg-block">
                 <nav class="navbar navbar-light position-relative" style="width: 250px;">
+                    <!-- 1. The Toggle Button -->
                     <button class="navbar-toggler border-0 fs-4 w-100 px-0 text-start" type="button"
                         data-bs-toggle="collapse" data-bs-target="#allCat">
                         <h4 class="m-0"><i class="fa fa-bars me-2"></i>All Categories</h4>
                     </button>
-                    <div class="collapse navbar-collapse rounded-bottom" id="allCat">
-                        <div class="navbar-nav ms-auto py-0">
-                            <li class="nav-item dropdown">
-                                <ul class="dropdown-menu border-0">
-                                    <% if (categories && categories.length) { %>
-                                        <% categories.forEach(cat => { %>
-                                            <li>
-                                                <a class="dropdown-item" href="/shop?category=<%= cat._id %>">
-                                                    <%= cat.name %>
-                                                </a>
-                                            </li>
-                                        <% }) %>
-                                    <% } else { %>
-                                        <li>
-                                            <span class="dropdown-item text-muted">No categories found</span>
-                                        </li>
-                                    <% } %>
-                                </ul>
-                            </li>
+                    <div class="collapse navbar-collapse rounded-bottom bg-white shadow border-top border-primary" id="allCat" 
+                        style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 999;">
+                        
+                        <div class="navbar-nav w-100 py-3">
+                            
+                            <% if (categories && categories.length) { %>
+                                <% categories.forEach(cat => { %>
+                                    <!-- 3. Simplified Links (Removed <li> and <ul>) -->
+                                    <!-- Just direct links with padding -->
+                                    <a href="/shop?category=<%= cat._id %>" class="nav-item nav-link px-4 py-2 text-dark">
+                                        <%= cat.name %>
+                                    </a>
+                                <% }) %>
+                            <% } else { %>
+                                <span class="nav-item nav-link px-4 text-muted">No categories found</span>
+                            <% } %>
+
                         </div>
                     </div>
                 </nav>

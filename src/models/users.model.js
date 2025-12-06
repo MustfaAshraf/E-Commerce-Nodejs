@@ -30,6 +30,12 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin', 'owner'],
       default: 'user',
     },
+
+    avatar: {
+        type: String,
+        default: null // If null, we will show a default placeholder
+    },
+    
     token: {
       type: String,
       default: null

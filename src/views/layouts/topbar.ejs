@@ -43,7 +43,7 @@
                     <!-- Logged In View -->
                     
                     <!-- 1. User Profile -->
-                    <a href="/profile" class="text-muted me-3" title="My Profile">
+                    <a href="/users/profile" class="text-muted me-3" title="My Profile">
                         <span class="rounded-circle btn-md-square border">
                             <i class="fas fa-user"></i>
                         </span>
@@ -55,19 +55,6 @@
                         <span class="rounded-circle btn-md-square border">
                             <i class="fas fa-shopping-bag"></i>
                         </span>
-                        
-                        <!-- The Badge Count -->
-                        <!-- We check if cartCount exists (from middleware) -->
-                        <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                                  style="border: 2px solid white;">
-                                <%= cartCount %>
-                            </span>
-                        <% } else { %>
-                            <!-- Optional: Show 0 if empty -->
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" 
-                                  style="border: 2px solid white;">0</span>
-                        <% } %>
                     </a>
 
                     <!-- 3. Logout -->

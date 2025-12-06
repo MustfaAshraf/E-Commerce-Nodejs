@@ -93,7 +93,10 @@ exports.createOrder = async (req, res) => {
     // We loop through items and decrement the quantity
     const stockUpdates = orderItems.map(item => {
         return Product.findByIdAndUpdate(item.productId, {
-            $inc: { quantity: -item.quantity } 
+            $inc: { 
+              quantity: -item.quantity,
+              sold: +item.quantity
+             } 
         });
     });
     await Promise.all(stockUpdates);

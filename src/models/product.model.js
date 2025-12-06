@@ -37,6 +37,11 @@ const productSchema = new mongoose.Schema(
         min: [0, 'Quantity cannot be negative']
     },
 
+    sold: {
+        type: Number,
+        default: 0
+    },
+
     image: {
         type: String,
         required: [true, 'Product image is required'] // Usually we want at least one image
