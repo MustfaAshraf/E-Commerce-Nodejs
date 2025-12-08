@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Categories - Admin</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar { min-height: 100vh; background: #343a40; color: #fff; }
+        .sidebar a { color: #adb5bd; text-decoration: none; padding: 15px 20px; display: block; border-bottom: 1px solid #4b545c; }
+        .sidebar a:hover, .sidebar a.active { background: #495057; color: #fff; border-left: 4px solid #fed700; }
+    </style>
+</head>
+<body>
+
+<div class="d-flex">
+    
+    <!-- SIDEBAR -->
+    <%- include('../layouts/dashboard-sidebar') %>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow-1 p-4">
+        <h2 class="mb-4">Categories</h2>
+
+        <!-- Error Alert -->
+        <% if (error) { %>
+            <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+
+        <div class="row g-4">
+            <!-- LIST -->
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Existing Categories</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Name</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (categories.length > 0) { %>
+                                    <% categories.forEach(cat => { %>
+                                        <tr>
+                                            <td class="ps-4 fw-bold"><%= cat.name %></td>
+                                            <td class="text-end pe-4">
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    <!-- 🆕 EDIT BUTTON -->
+                                                    <a href="/dashboard/categories/edit/<%= cat._id %>" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                                        <i class="fas fa-edit" style="font-size: 12px;"></i>
+                                                    </a>
+
+                                                    <!-- DELETE FORM -->
+                                                    <form action="/dashboard/categories/delete/<%= cat._id %>" method="POST" onsubmit="return confirm('Delete this category?');">
+                                                        <button class="btn btn-sm btn-outline-danger rounded-circle" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-trash" style="font-size: 12px;"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="2" class="text-center py-4">No categories found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADD FORM -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-success text-white py-3">
+                        <h5 class="mb-0"><i class="fas fa-plus me-2"></i> Add New</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/dashboard/categories" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">Category Name</label>
+                                <input type="text" name="name" class="form-control" placeholder="e.g. Headphones" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success">Create Category</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

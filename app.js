@@ -35,8 +35,8 @@ const cartRoutes = require('./src/routes/cart.routes');
 const authRoutes = require('./src/routes/auth.routes');
 const userRoutes = require('./src/routes/user.routes');
 const orderRoutes = require('./src/routes/order.routes');
-const couponRoutes = require('./src/routes/coupon.routes');
 const contactRoutes = require('./src/routes/message.routes');
+const adminRoutes = require('./src/routes/admin.routes');
 
 const setUser = require('./src/middlewares/setUser.middleware');
 
@@ -46,7 +46,6 @@ app.use(setUser);  // <-- SAFE, public friendly
 app.use(require('./src/middlewares/loadCategories.middleware'));
 
 app.use((req, res, next) => {
-    res.locals.user = req.user || null;
     res.locals.query = req.query || null;
     next();
 });
@@ -57,8 +56,8 @@ app.use('/products', productRoutes);
 app.use('/my/cart', cartRoutes);
 app.use('/users', userRoutes);
 app.use('/orders', orderRoutes);
-app.use('/coupons', couponRoutes);
 app.use('/contact', contactRoutes);
+app.use('/dashboard', adminRoutes);
 
 
 app.use('/', shopRoutes);

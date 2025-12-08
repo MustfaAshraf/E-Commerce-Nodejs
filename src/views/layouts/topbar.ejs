@@ -42,15 +42,24 @@
                 <% } else { %>
                     <!-- Logged In View -->
                     
-                    <!-- 1. User Profile -->
-                    <a href="/users/profile" class="text-muted me-3" title="My Profile">
-                        <span class="rounded-circle btn-md-square border">
-                            <i class="fas fa-user"></i>
-                        </span>
-                    </a>
+                    <!-- 1. DYNAMIC ICON: Dashboard vs Profile -->
+                    <% if (user && (user.role === 'admin' || user.role === 'owner')) { %>
+                        <!-- Admin/Owner Link -->
+                        <a href="/dashboard" class="text-muted me-3" title="Dashboard">
+                            <span class="rounded-circle btn-md-square border">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </span>
+                        </a>
+                    <% } else { %>
+                        <!-- Customer Link -->
+                        <a href="/users/profile" class="text-muted me-3" title="My Profile">
+                            <span class="rounded-circle btn-md-square border">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        </a>
+                    <% } %>
 
-                    <!-- 2. CART ICON (New) -->
-                    <!-- position-relative is needed so the badge knows where to stick -->
+                    <!-- 2. CART ICON (With Badge Logic) -->
                     <a href="/my/cart" class="position-relative me-3 text-muted" title="View Cart">
                         <span class="rounded-circle btn-md-square border">
                             <i class="fas fa-shopping-bag"></i>
@@ -64,19 +73,11 @@
                         </span>
                     </a>
                     
-                    <!-- Optional: Show Price next to icons -->
-                    <!-- 
-                    <% if (typeof cart !== 'undefined' && cart && cart.calculation) { %>
-                        <div class="d-flex flex-column text-start ms-2">
-                            <small class="text-muted" style="font-size: 10px;">Total</small>
-                            <span class="fw-bold" style="font-size: 14px;">$<%= cart.calculation.total.toFixed(2) %></span>
-                        </div>
-                    <% } %> 
-                    -->
                 <% } %>
 
             </div>
         </div>
     </div>
 </div>
+<!-- Topbar End -->
 <!-- Topbar End -->

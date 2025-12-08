@@ -155,48 +155,6 @@ exports.getMyOrders = async (req, res) => {
   }
 };
 
-// 3️⃣ ADMIN: GET ALL ORDERS (JSON API)
-exports.getAllOrders = async (req, res) => {
-  try {
-    const orders = await Order.find()
-      .populate("userId", "name email")
-      .sort({ createdAt: -1 });
-
-    return res.status(200).json({ 
-      status: "success", 
-      data: { 
-        orders 
-      } 
-    });
-  } catch (err) {
-    return res.status(500).json({ 
-      status: "error", 
-      message: err.message 
-    });
-  }
-};
-
-// 4️⃣ ADMIN: UPDATE STATUS (JSON API)
-exports.updateOrderStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
-    
-    if (!order) return res.status(404).json({ message: "Order not found" });
-
-    return res.status(200).json({ 
-      status: "success", 
-      data: { 
-        order 
-      } 
-    });
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
-  }
-};
-
 // 5️⃣ ADMIN: DELETE ORDER (JSON API)
 exports.deleteOrder = async (req, res) => {
   try {

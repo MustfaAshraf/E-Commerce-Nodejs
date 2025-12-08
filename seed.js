@@ -13,17 +13,7 @@ const seedData = async () => {
     try {
         // 1. Get an Owner (We need a user ID for the 'owner' field)
         // We grab the first user found, or create a dummy one if none exist.
-        let owner = await User.findOne();
-        if (!owner) {
-            console.log('⚠️ No users found. Creating a dummy admin...');
-            owner = await User.create({
-                name: "Admin Seeder",
-                email: "admin@seed.com",
-                password: "hashedpassword123", // Dummy hash
-                role: "admin",
-                address: { country: "US", city: "NY", street: "Wall St" }
-            });
-        }
+        let owner = await User.findById('69212403f4087d7f35aa5a6d');
 
         // 2. Clear existing data (Optional: Comment out if you want to keep old data)
         await Product.deleteMany({});
@@ -146,7 +136,7 @@ const seedData = async () => {
                 price: 350.00,
                 quantity: 10,
                 category: catElectronics._id,
-                image: "product-1.png", // Reusing image
+                image: "product-12.png", // Reusing image
                 owner: owner._id
             }
         ];

@@ -3,7 +3,7 @@ const router = express.Router();
 
 const controller = require('../controllers/category.controller');
 const auth = require('../middlewares/auth.middleware');
-const adminOnly = require('../middlewares/adminOnly.middleware');
+const adminOrOwner = require('../middlewares/adminOrOwner.middleware');
 const validateJson = require('../middlewares/validateJSON.middleware'); 
 const { categoryRules } = require('../validations/category.validator');
 
@@ -13,7 +13,7 @@ router.get('/', controller.getCategories);
 // 2. Create
 router.post('/', 
     auth, 
-    adminOnly, 
+    adminOrOwner('error'), 
     categoryRules, 
     validateJson, 
     controller.createCategory
@@ -22,7 +22,7 @@ router.post('/',
 // 3. Update (Added)
 router.patch('/:id', 
     auth, 
-    adminOnly, 
+    adminOrOwner('error'), 
     categoryRules, // Validate the new name
     validateJson, 
     controller.updateCategory
@@ -31,7 +31,7 @@ router.patch('/:id',
 // 4. Delete
 router.delete('/:id', 
     auth, 
-    adminOnly, 
+    adminOrOwner('error'), 
     controller.deleteCategory
 );
 

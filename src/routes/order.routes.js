@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const orderCtrl = require("../controllers/order.controller");
 const auth = require("../middlewares/auth.middleware");
-const adminOnly = require('../middlewares/adminOnly.middleware');
+const adminOrOwner = require('../middlewares/adminOrOwner.middleware');
 const loadCart = require('../middlewares/loadCart.middleware'); // Need this!
 
 // GET Checkout Page (New)
@@ -13,8 +13,6 @@ router.post("/create", auth, orderCtrl.createOrder); // Triggered by "Checkout" 
 router.get("/my", auth, orderCtrl.getMyOrders);      // View History
 
 // 2. Admin Routes (API)
-router.get("/", auth, adminOnly, orderCtrl.getAllOrders);
-router.patch("/:id", auth, adminOnly, orderCtrl.updateOrderStatus);
-router.delete("/:id", auth, adminOnly, orderCtrl.deleteOrder);
+router.delete("/:id", auth, adminOrOwner('error'), orderCtrl.deleteOrder);
 
 module.exports = router;

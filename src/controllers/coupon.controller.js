@@ -1,121 +1,72 @@
 const Coupon = require("../models/coupon.model");
-const mongoose = require("mongoose");
 
-// GET all coupons (list)
-exports.getAllCoupons = async (req, res) => {
+// GET: Show Coupon Management Page
+exports.getCouponsPage = async (req, res) => {
   try {
     const coupons = await Coupon.find().sort({ createdAt: -1 });
-    return res.status(200).json({
-      status: "success",
-      data: { coupons },
+    
+    res.render('admin/coupons', {
+        pageTitle: 'Manage Coupons',
+        coupons: coupons,
+        user: req.user,
+        error: null
     });
   } catch (err) {
-    return res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    console.error(err);
+    res.status(500).render('error', { message: err.message });
   }
 };
 
-// POST create coupon
+// POST: Create Coupon
 exports.createCoupon = async (req, res) => {
   try {
-    const { code, discountType, discountValue, expiresAt, isActive } = req.body;
+    const { code, discountType, discountValue, expiresAt } = req.body;
 
-    const coupon = await Coupon.create({
+    // Default isActive to true if created via Dashboard
+    await Coupon.create({
       code: code.trim().toUpperCase(),
       discountType,
       discountValue,
       expiresAt,
-      isActive: isActive
+      isActive: true
     });
 
-    return res.status(201).json({
-      status: "success",
-      data: { coupon },
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send("Failed to create coupon");
-  }
-};
-
-// POST update coupon
-exports.updateCoupon = async (req, res) => {
-  try {
-    const updates = {};
-
-    // Code (optional)
-    if (req.body.code !== undefined && req.body.code.trim() !== "") {
-      updates.code = req.body.code.trim().toUpperCase();
-    }
-
-    // Discount Type (optional)
-    if (req.body.discountType !== undefined) {
-      updates.discountType = req.body.discountType;
-    }
-
-    // Discount Value (optional)
-    if (req.body.discountValue !== undefined) {
-      updates.discountValue = req.body.discountValue;
-    }
-
-    // Expires At (optional)
-    if (req.body.expiresAt !== undefined && req.body.expiresAt !== "") {
-      updates.expiresAt = new Date(req.body.expiresAt);
-    }
-
-    // isActive (optional)
-    if (req.body.isActive !== undefined) {
-      // handle checkbox OR boolean
-      updates.isActive = req.body.isActive === "on" || req.body.isActive === true;
-    }
-
-    const coupon = await Coupon.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!coupon) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Coupon not found",
-      });
-    }
-
-    return res.status(200).json({
-      status: "success",
-      data: { coupon },
-    });
+    res.redirect('/dashboard/coupons');
 
   } catch (err) {
-    return res.status(500).json({
-      status: "error",
-      message: err.message,
+    // If Duplicate or Error, reload page with message
+    const coupons = await Coupon.find().sort({ createdAt: -1 });
+    const errorMsg = err.code === 11000 ? 'Coupon code already exists' : err.message;
+
+    res.render('admin/coupons', {
+        pageTitle: 'Manage Coupons',
+        coupons: coupons,
+        user: req.user,
+        error: errorMsg
     });
   }
 };
 
-
-// DELETE coupon
+// POST: Delete Coupon
 exports.deleteCoupon = async (req, res) => {
   try {
-    const coupon = await Coupon.findByIdAndDelete(req.params.id);
-    if (!coupon) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Coupon not found",
-      });
-    }
-
-    return res.status(200).json({
-      status: "success",
-      message: "Coupon deleted",
-    });
+    await Coupon.findByIdAndDelete(req.params.id);
+    res.redirect('/dashboard/coupons');
   } catch (err) {
-    return res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    res.status(500).render('error', { message: "Failed to delete coupon" });
   }
 };
+
+// Toggle Status (Optional but cool: Activate/Deactivate)
+exports.toggleStatus = async (req, res) => {
+    try {
+        const coupon = await Coupon.findById(req.params.id);
+        if(coupon) {
+            coupon.isActive = !coupon.isActive;
+            await coupon.save();
+        }
+        res.redirect('/dashboard/coupons');
+    } catch(err) {
+        res.redirect('/dashboard/coupons');
+    }
+}

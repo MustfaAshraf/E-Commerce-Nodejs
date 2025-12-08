@@ -24,20 +24,20 @@ exports.getAddProductPage = async (req, res) => {
 // 2. POST: Create the Product
 exports.createProduct = async (req, res) => {
   try {
-    const data = matchedData(req);
+    // 1. Clean Data
+    const data = matchedData(req); 
 
+    // 2. Handle Image
     if (!req.file) {
-      // If no image, render error (and we don't need to delete anything)
-      const categories = await Category.find();
-      return res.status(400).render('products/add-product', {
-        message: 'Product image is required',
-        categories,
-        userInput: req.body,
-        editing: false
-      });
+        const categories = await Category.find();
+        return res.status(400).render('products/add-product', {
+            message: 'Product image is required',
+            categories,
+            userInput: req.body
+        });
     }
 
-    // C. Create Product
+    // 3. Create Product
     await Product.create({
       name: data.name,
       description: data.description,
@@ -45,20 +45,34 @@ exports.createProduct = async (req, res) => {
       quantity: data.quantity || 0,
       category: data.category,
       image: req.file.filename,
-      owner: req.user._id // <--- CRITICAL: Save the logged-in user ID
+      
+      // ✅ FIX: Manually attach the Owner ID
+      // We use req.user.id || req.user._id (depending on how your auth sets it)
+      owner: req.user.id
     });
 
-    // D. Success -> Redirect to Shop
-    return res.redirect('/shop');
+    // 4. Success -> Redirect
+    // If Admin/Owner, maybe redirect to Dashboard list instead of Shop?
+    // For now, let's go to the admin product list so they see their new item.
+    return res.redirect('/dashboard/products');
 
   } catch (err) {
-    console.error(err);
-    // If DB fails (e.g., connection lost), we must delete the uploaded image
-    // to prevent "garbage" files in our server
+    console.error("Create Product Error:", err);
+    
+    // Cleanup image if DB fails
     if (req.file) {
-      fs.unlink(req.file.path, (err) => { if (err) console.error(err); });
+        fs.unlink(req.file.path, (err) => { if(err) console.error(err); });
     }
-    return res.status(500).render('error', { message: 'Database creation failed' });
+    
+    // Pass categories back so the dropdown doesn't break on error page
+    const categories = await Category.find();
+    
+    return res.status(500).render('products/add-product', {
+        pageTitle: 'Add Product',
+        categories: categories,
+        userInput: req.body,
+        message: 'Database creation failed: ' + err.message
+    });
   }
 };
 
@@ -195,7 +209,7 @@ exports.getEditProductPage = async (req, res) => {
         return res.status(404).render('error', { message: 'Product not found' });
     }
 
-    if (product.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    if (product.owner.toString() !== req.user.id.toString() && req.user.role !== 'admin') {
         return res.status(403).render('error', { message: 'Not authorized to edit this product' });
     }
 
@@ -224,98 +238,101 @@ exports.updateProduct = async (req, res) => {
   try {
     const updates = {};
     const allowed = ['name', 'description', 'price', 'quantity', 'category'];
+    
     allowed.forEach(key => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
 
     if (updates.category && !mongoose.Types.ObjectId.isValid(updates.category)) {
-      res.status(400).render('error', { 
-      message: 'Category ID is invalid' 
-    });
+      return res.status(400).render('error', { message: 'Category ID is invalid' });
     }
 
-    // If a new file is uploaded, we need to delete old image later
+    // If a new file is uploaded
     const newImage = req.file ? req.file.filename : null;
 
-    // First, fetch product to know the old image filename
+    // 1. Fetch existing product
     const existingProduct = await Product.findById(req.params.id);
 
     if (!existingProduct) {
-      // If product not found and we uploaded an image, delete the new upload to avoid orphan files
+      // Clean up uploaded image if product not found
       if (newImage) {
-        fs.unlink(
-          path.join(__dirname, '../../uploads/productImages', newImage),() => { }
-        );
+        fs.unlink(path.join(__dirname, '../../uploads/productImages', newImage), () => {});
       }
-
-      return res.status(404).render('error',{ 
-        message: 'Product not found' 
-      })
+      return res.status(404).render('error', { message: 'Product not found' });
     }
 
-    // If new image exists, set the update value
+    // 2. 🔒 SECURITY CHECK (Fixed Variable Name)
+    // We must check 'existingProduct.owner', not 'product.owner'
+    if (req.user.role !== 'admin' && existingProduct.owner.toString() !== req.user.id.toString()) {
+        return res.status(403).render('error', { message: 'Unauthorized action' });
+    }
+
+    // 3. Prepare Image Update
     if (newImage) updates.image = newImage;
 
-    // Apply update
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updates, { new: true }).populate('category');
+    // 4. Apply Update
+    await Product.findByIdAndUpdate(req.params.id, updates, { new: true });
 
-    // If new image was uploaded, delete the old one
+    // 5. Delete Old Image (If new one was uploaded)
     if (newImage && existingProduct.image) {
-      const oldImagePath = path.join(
-        __dirname,
-        '../../uploads/productImages',
-        existingProduct.image
-      );
-
+      const oldImagePath = path.join(__dirname, '../../uploads/productImages', existingProduct.image);
       if (fs.existsSync(oldImagePath)) {
         fs.unlink(oldImagePath, (err) => {
-          if (err) {
-            return res.status(400).render('error', {
-                message: 'Error deleting image'
-              })
-          }
+          if (err) console.error("Error deleting old image:", err);
         });
       }
     }
 
-    return res.status(200).render('product', { 
-      product: updatedProduct 
-    })
+    // 6. ✅ SUCCESS REDIRECT
+    // Don't render a non-existent view. Go back to the Admin Product List.
+    return res.redirect('/dashboard/products');
 
   } catch (err) {
     console.error(err);
-    res.status(500).render('error', { 
-      message: err.message 
-    });
+    res.status(500).render('error', { message: err.message });
   }
 };
 
 
 exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) return res.status(404).render('error', {
-        message: 'Product not found'
-      })
+    const productId = req.params.id;
+
+    // 1. Find the product first (DO NOT delete yet)
+    const product = await Product.findById(productId);
+
+    if (!product) {
+        return res.status(404).render('error', { message: 'Product not found' });
+    }
+
+    // 2. 🔒 SECURITY CHECK (The Critical Logic)
+    // Allow if User is Admin OR User is the Owner of this specific product
+    if (req.user.role !== 'admin' && product.owner.toString() !== req.user.id.toString()) {
+        return res.status(403).render('error', { message: 'You are not authorized to delete this product' });
+    }
+
+    // 3. Delete Image from Server
     if (product.image) {
+      // Adjust path if necessary based on your folder structure
       const imagePath = path.join(__dirname, '../../uploads/productImages', product.image);
 
-      // check first to avoid errors
       if (fs.existsSync(imagePath)) {
         fs.unlink(imagePath, (err) => {
-          if (err) {
-            return res.status(400).render('error', {
-                message: 'Error deleting image'
-              });
-          }
+          if (err) console.error("Error deleting image file:", err);
         });
       }
     }
 
-    return res.status(200).render('shop')
+    // 4. Delete Product from DB
+    await Product.findByIdAndDelete(productId);
+
+    // 5. Redirect
+    // Usually, we redirect back to the Admin Dashboard list, not the Shop view
+    return res.redirect('/dashboard/products');
+
   } catch (err) {
     console.error(err);
-    res.status(500).render('error', { 
+    return res.status(500).render('error', { 
       message: err.message 
     });
   }
