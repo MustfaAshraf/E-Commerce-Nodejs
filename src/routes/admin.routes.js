@@ -30,5 +30,9 @@ router.get('/coupons', strictAdmin, couponCtrl.getCouponsPage);
 router.post('/coupons', strictAdmin, couponCtrl.createCoupon);
 router.post('/coupons/delete/:id', strictAdmin, couponCtrl.deleteCoupon);
 router.post('/coupons/toggle/:id', strictAdmin, couponCtrl.toggleStatus);
+// 📩 MESSAGE ROUTES (Strict Admin)
+router.get('/messages', strictAdmin, adminCtrl.getMessages);
+router.post('/messages/toggle/:id', strictAdmin, adminCtrl.toggleMessageRead);
+router.post('/messages/delete/:id', strictAdmin, adminCtrl.deleteMessage);
 
 module.exports = router;

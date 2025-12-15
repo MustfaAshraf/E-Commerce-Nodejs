@@ -1,6 +1,7 @@
 const Product = require('../models/product.model');
 const Order = require('../models/order.model');
 const User = require('../models/users.model');
+const Message = require('../models/message.model');
 
 exports.getDashboard = async (req, res) => {
   try {
@@ -267,5 +268,45 @@ exports.deleteUser = async (req, res) => {
     } catch(err) {
       console.log(err);
       res.redirect('/dashboard/users?error=Fail');
+    }
+};
+
+exports.getMessages = async (req, res) => {
+    try {
+        // Fetch messages, newest first
+        const messages = await Message.find().sort({ createdAt: -1 });
+
+        res.render('admin/messages', {
+            pageTitle: 'Support Messages',
+            messages: messages,
+            user: req.user
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).render('error', { message: 'Failed to load messages' });
+    }
+};
+
+// POST: Toggle "Read" Status
+exports.toggleMessageRead = async (req, res) => {
+    try {
+        const message = await Message.findById(req.params.id);
+        if (message) {
+            message.isRead = !message.isRead; // Flip true/false
+            await message.save();
+        }
+        res.redirect('/dashboard/messages');
+    } catch (err) {
+        res.redirect('/dashboard/messages');
+    }
+};
+
+// POST: Delete Message
+exports.deleteMessage = async (req, res) => {
+    try {
+        await Message.findByIdAndDelete(req.params.id);
+        res.redirect('/dashboard/messages');
+    } catch (err) {
+        res.redirect('/dashboard/messages?error=DeleteFailed');
     }
 };
