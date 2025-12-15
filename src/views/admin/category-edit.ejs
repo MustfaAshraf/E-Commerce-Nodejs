@@ -5,57 +5,135 @@
     <title>Edit Category - Admin</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
     <style>
-        body { background-color: #f8f9fa; }
-        .sidebar { min-height: 100vh; background: #343a40; color: #fff; }
-        .sidebar a { color: #adb5bd; text-decoration: none; padding: 15px 20px; display: block; border-bottom: 1px solid #4b545c; }
-        .sidebar a:hover, .sidebar a.active { background: #495057; color: #fff; border-left: 4px solid #fed700; }
+        /* 1. Base Setup */
+        body { 
+            background-color: #f8f9fa; 
+            overflow-x: hidden; 
+        }
+
+        /* 2. The Wrapper (Flex Container) */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+            transition: all 0.3s;
+        }
+
+        /* 3. The Sidebar */
+        .sidebar {
+            min-width: 250px; 
+            max-width: 250px;
+            min-height: 100vh;
+            background: #343a40;
+            color: #fff;
+            transition: margin 0.3s ease-out;
+        }
+
+        /* 4. The "Hidden" State */
+        #wrapper.toggled .sidebar {
+            margin-left: -250px; 
+        }
+
+        /* 5. The Content Area */
+        #page-content-wrapper {
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* --- Sidebar Links --- */
+        .sidebar a {
+            color: #adb5bd;
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            border-bottom: 1px solid #4b545c;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: #495057;
+            color: #fff;
+            border-left: 4px solid #fed700;
+        }
     </style>
 </head>
 <body>
 
-<div class="d-flex">
+<div id="wrapper">
     
-    <!-- SIDEBAR (Copy your standard sidebar here or include a partial) -->
+    <!-- SIDEBAR INCLUDE -->
     <%- include('../layouts/dashboard-sidebar') %>
     
-    <!-- MAIN CONTENT -->
-    <div class="flex-grow-1 p-4">
+    <!-- MAIN CONTENT WRAPPER -->
+    <div id="page-content-wrapper">
         
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Edit Category</h2>
-            <a href="/dashboard/categories" class="btn btn-outline-secondary rounded-pill px-4">Back to List</a>
-        </div>
+        <!-- TOP NAVBAR WITH TOGGLE BUTTON -->
+        <nav class="navbar navbar-light bg-white border-bottom px-4 py-3 mb-4 shadow-sm">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-primary" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="ms-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="/dashboard/categories">Categories</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit</li>
+                    </ol>
+                </nav>
+            </div>
+        </nav>
 
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-primary text-white py-3">
-                        <h5 class="mb-0">Update Details</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        
-                        <% if (error) { %>
-                            <div class="alert alert-danger"><%= error %></div>
-                        <% } %>
+        <!-- PAGE CONTENT -->
+        <div class="container-fluid px-4">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Edit Category</h2>
+                <a href="/dashboard/categories" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fas fa-arrow-left me-2"></i> Back to List
+                </a>
+            </div>
 
-                        <form action="/dashboard/categories/edit/<%= category._id %>" method="POST">
-                            <div class="mb-3">
-                                <label class="form-label">Category Name</label>
-                                <input type="text" name="name" class="form-control" value="<%= category.name %>" required>
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Update Category</button>
-                            </div>
-                        </form>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h5 class="mb-0">Update Details</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            
+                            <% if (error) { %>
+                                <div class="alert alert-danger"><%= error %></div>
+                            <% } %>
 
+                            <form action="/dashboard/categories/edit/<%= category._id %>" method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label">Category Name</label>
+                                    <input type="text" name="name" class="form-control" value="<%= category.name %>" required>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Update Category</button>
+                                </div>
+                            </form>
+
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
+
+<!-- TOGGLE SCRIPT -->
+<script>
+    const toggleButton = document.getElementById("menu-toggle");
+    const wrapper = document.getElementById("wrapper");
+
+    toggleButton.onclick = function() {
+        wrapper.classList.toggle("toggled");
+    };
+</script>
 
 </body>
 </html>

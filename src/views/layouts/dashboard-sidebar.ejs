@@ -1,52 +1,54 @@
-<div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
+<!-- src/views/admin/partials/sidebar.ejs -->
+<div id="sidebar" class="sidebar flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 250px; height: 100vh; position: sticky; top: 0; transition: all 0.3s;">
     <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4 fw-bold">Electro Admin</span>
+        <% if (user.role === 'admin') { %>
+            <span class="fs-4 fw-bold">Electro Admin</span>
+        <% } else { %>
+            <span class="fs-4 fw-bold">Electro Vendor</span>
+        <% } %>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
         
         <!-- SHARED LINKS -->
         <li>
-            <a href="/dashboard" class="<%= pageTitle === 'Dashboard' ? 'active' : '' %>">
+            <a href="/dashboard" class="nav-link text-white <%= typeof pageTitle !== 'undefined' && pageTitle === 'Dashboard' ? 'active' : '' %>">
                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
             </a>
         </li>
         <li>
-            <a href="/dashboard/products" class="<%= pageTitle.includes('Product') ? 'active' : '' %>">
+            <a href="/dashboard/products" class="nav-link text-white <%= typeof pageTitle !== 'undefined' && pageTitle.includes('Product') ? 'active' : '' %>">
                 <i class="fas fa-box me-2"></i> Products
             </a>
         </li>
-        
-        <!-- Hide Orders for now if you want, or keep it shared -->
         <li>
-            <a href="/dashboard/orders" class="<%= pageTitle.includes('Order') ? 'active' : '' %>">
+            <a href="/dashboard/orders" class="nav-link text-white <%= typeof pageTitle !== 'undefined' && pageTitle.includes('Order') ? 'active' : '' %>">
                 <i class="fas fa-shopping-cart me-2"></i> Orders
             </a>
         </li>
 
-        <!-- 🔒 STRICT ADMIN LINKS (Hidden for Vendors) -->
+        <!-- 🔒 STRICT ADMIN LINKS -->
         <% if (user.role === 'admin') { %>
             <hr class="border-secondary my-2">
             <small class="text-uppercase text-muted px-3" style="font-size: 10px;">Platform</small>
             
             <li>
-                <a href="/dashboard/categories" class="<%= pageTitle.includes('Categor') ? 'active' : '' %>">
+                <a href="/dashboard/categories" class="nav-link text-white <%= typeof pageTitle !== 'undefined' && pageTitle.includes('Categor') ? 'active' : '' %>">
                     <i class="fas fa-tags me-2"></i> Categories
                 </a>
             </li>
             <li>
-                <a href="/dashboard/users" class="<%= pageTitle.includes('User') ? 'active' : '' %>">
+                <a href="/dashboard/users" class="nav-link text-white <%= typeof pageTitle !== 'undefined' && pageTitle.includes('User') ? 'active' : '' %>">
                     <i class="fas fa-users me-2"></i> Users
                 </a>
             </li>
             <li>
-                <a href="/dashboard/messages" class="<%= pageTitle.includes('Message') ? 'active' : '' %>">
+                <a href="/dashboard/messages" class="nav-link text-white <%= typeof pageTitle !== 'undefined' && pageTitle.includes('Message') ? 'active' : '' %>">
                     <i class="fas fa-envelope me-2"></i> Messages
                 </a>
             </li>
-            <!-- Active Link -->
             <li>
-                <a href="/dashboard/coupons" class="<%= pageTitle.includes('Coupon') ? 'active' : '' %>">
+                <a href="/dashboard/coupons" class="nav-link text-white <%= typeof pageTitle !== 'undefined' && pageTitle.includes('Coupon') ? 'active' : '' %>">
                     <i class="fas fa-ticket-alt me-2"></i> Coupons
                 </a>
             </li>

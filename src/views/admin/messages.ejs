@@ -21,29 +21,7 @@
 <div class="d-flex">
     
     <!-- SIDEBAR -->
-    <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
-        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4 fw-bold">Electro Admin</span>
-        </a>
-        <hr>
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li><a href="/admin"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
-            <li><a href="/admin/products"><i class="fas fa-box me-2"></i> Products</a></li>
-            <li><a href="/admin/orders"><i class="fas fa-shopping-cart me-2"></i> Orders</a></li>
-            
-            <% if (user.role === 'admin') { %>
-                <hr class="border-secondary my-2">
-                <small class="text-uppercase text-muted px-3" style="font-size: 10px;">Platform</small>
-                <li><a href="/admin/categories"><i class="fas fa-tags me-2"></i> Categories</a></li>
-                <li><a href="/admin/users"><i class="fas fa-users me-2"></i> Users</a></li>
-                <li><a href="/admin/coupons"><i class="fas fa-ticket-alt me-2"></i> Coupons</a></li>
-                <!-- Active Link -->
-                <li><a href="/admin/messages" class="active"><i class="fas fa-envelope me-2"></i> Messages</a></li>
-            <% } %>
-        </ul>
-        <hr>
-        <div class="dropdown"><a href="/" class="d-flex align-items-center text-white text-decoration-none"><i class="fas fa-home me-2"></i> Back to Store</a></div>
-    </div>
+    <%- include('../layouts/dashboard-sidebar') %>
 
     <!-- MAIN CONTENT -->
     <div class="flex-grow-1 p-4">
@@ -86,14 +64,14 @@
                                         </button>
 
                                         <!-- Toggle Read/Unread -->
-                                        <form action="/admin/messages/toggle/<%= msg._id %>" method="POST" class="d-inline">
+                                        <form action="/dashboard/messages/toggle/<%= msg._id %>" method="POST" class="d-inline">
                                             <button class="btn btn-sm btn-outline-secondary rounded-circle" title="Mark as Read/Unread">
                                                 <i class="fas <%= msg.isRead ? 'fa-envelope' : 'fa-envelope-open' %>"></i>
                                             </button>
                                         </form>
 
                                         <!-- Delete -->
-                                        <form action="/admin/messages/delete/<%= msg._id %>" method="POST" class="d-inline" onsubmit="return confirm('Delete this message?');">
+                                        <form action="/dashboard/messages/delete/<%= msg._id %>" method="POST" class="d-inline" onsubmit="return confirm('Delete this message?');">
                                             <button class="btn btn-sm btn-outline-danger rounded-circle" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -121,7 +99,7 @@
                                             <div class="modal-footer">
                                                 <!-- Auto-mark as read button inside modal -->
                                                 <% if(!msg.isRead) { %>
-                                                    <form action="/admin/messages/toggle/<%= msg._id %>" method="POST">
+                                                    <form action="/dashboard/messages/toggle/<%= msg._id %>" method="POST">
                                                         <button type="submit" class="btn btn-success">Mark as Read</button>
                                                     </form>
                                                 <% } %>

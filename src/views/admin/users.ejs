@@ -5,84 +5,171 @@
     <title>Manage Users - Admin</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
     <style>
-        body { background-color: #f8f9fa; }
-        .sidebar { min-height: 100vh; background: #343a40; color: #fff; }
-        .sidebar a { color: #adb5bd; text-decoration: none; padding: 15px 20px; display: block; border-bottom: 1px solid #4b545c; }
-        .sidebar a:hover, .sidebar a.active { background: #495057; color: #fff; border-left: 4px solid #fed700; }
-        .avatar-small { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
+        /* 1. Base Setup */
+        body { 
+            background-color: #f8f9fa; 
+            overflow-x: hidden; 
+        }
+
+        /* 2. The Wrapper (Flex Container) */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+            transition: all 0.3s;
+        }
+
+        /* 3. The Sidebar */
+        .sidebar {
+            min-width: 250px; 
+            max-width: 250px;
+            min-height: 100vh;
+            background: #343a40;
+            color: #fff;
+            transition: margin 0.3s ease-out;
+        }
+
+        /* 4. The "Hidden" State */
+        #wrapper.toggled .sidebar {
+            margin-left: -250px; 
+        }
+
+        /* 5. The Content Area */
+        #page-content-wrapper {
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* --- Existing Styles --- */
+        .sidebar a {
+            color: #adb5bd;
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            border-bottom: 1px solid #4b545c;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: #495057;
+            color: #fff;
+            border-left: 4px solid #fed700;
+        }
+        .avatar-small { 
+            width: 40px; height: 40px; object-fit: cover; border-radius: 50%; 
+        }
     </style>
 </head>
 <body>
 
-<div class="d-flex">
+<div id="wrapper">
     
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR INCLUDE -->
     <%- include('../layouts/dashboard-sidebar') %>
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-grow-1 p-4">
-        <h2 class="mb-4">User Management</h2>
-
-        <div class="card shadow-sm border-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">User</th>
-                            <th>Role</th>
-                            <th>Joined</th>
-                            <th class="text-end pe-4">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (users.length > 0) { %>
-                            <% users.forEach(user => { %>
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="d-flex align-items-center">
-                                            <% if (user.avatar) { %>
-                                                <img src="/uploads/userAvatars/<%= user.avatar %>" class="avatar-small me-3">
-                                            <% } else { %>
-                                                <div class="avatar-small bg-secondary text-white d-flex align-items-center justify-content-center me-3"><i class="fas fa-user"></i></div>
-                                            <% } %>
-                                            <div>
-                                                <div class="fw-bold"><%= user.name %></div>
-                                                <small class="text-muted"><%= user.email %></small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <% if (user.role === 'owner') { %>
-                                            <span class="badge bg-dark">Owner</span>
-                                        <% } else if (user.role === 'admin') { %>
-                                            <span class="badge bg-primary">Admin</span>
-                                        <% } else { %>
-                                            <span class="badge bg-light text-dark border">Customer</span>
-                                        <% } %>
-                                    </td>
-                                    <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
-                                    <td class="text-end pe-4">
-                                        <!-- Only allow deleting if target is NOT Owner and NOT Self -->
-                                        <% if (user.role !== 'owner' && user.id.toString() !== currentUser.id.toString()) { %>
-                                            <form action="/dashboard/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Ban/Delete this user?');">
-                                                <button class="btn btn-sm btn-outline-danger">
-                                                    <i class="fas fa-ban"></i> Ban
-                                                </button>
-                                            </form>
-                                        <% } else { %>
-                                            <span class="text-muted small">Protected</span>
-                                        <% } %>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        <% } %>
-                    </tbody>
-                </table>
+    <!-- MAIN CONTENT WRAPPER -->
+    <div id="page-content-wrapper">
+        
+        <!-- TOP NAVBAR WITH TOGGLE BUTTON -->
+        <nav class="navbar navbar-light bg-white border-bottom px-4 py-3 mb-4 shadow-sm">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-primary" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="ms-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Users</li>
+                    </ol>
+                </nav>
             </div>
+        </nav>
+
+        <!-- PAGE CONTENT -->
+        <div class="container-fluid px-4">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">User Management</h2>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-5">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">User</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (users.length > 0) { %>
+                                    <% users.forEach(user => { %>
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    <% if (user.avatar) { %>
+                                                        <img src="/uploads/userAvatars/<%= user.avatar %>" class="avatar-small me-3">
+                                                    <% } else { %>
+                                                        <div class="avatar-small bg-secondary text-white d-flex align-items-center justify-content-center me-3">
+                                                            <i class="fas fa-user"></i>
+                                                        </div>
+                                                    <% } %>
+                                                    <div>
+                                                        <div class="fw-bold"><%= user.name %></div>
+                                                        <small class="text-muted"><%= user.email %></small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <% if (user.role === 'owner') { %>
+                                                    <span class="badge bg-dark">Owner</span>
+                                                <% } else if (user.role === 'admin') { %>
+                                                    <span class="badge bg-primary">Admin</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-light text-dark border">Customer</span>
+                                                <% } %>
+                                            </td>
+                                            <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                                            <td class="text-end pe-4">
+                                                <!-- Only allow deleting if target is NOT Owner and NOT Self -->
+                                                <% if (user.role !== 'owner' && user.id.toString() !== currentUser.id.toString()) { %>
+                                                    <form action="/dashboard/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Ban/Delete this user?');">
+                                                        <button class="btn btn-sm btn-outline-danger">
+                                                            <i class="fas fa-ban"></i> Ban
+                                                        </button>
+                                                    </form>
+                                                <% } else { %>
+                                                    <span class="text-muted small">Protected</span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="4" class="text-center py-5 text-muted">No users found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
+
+<!-- TOGGLE SCRIPT -->
+<script>
+    const toggleButton = document.getElementById("menu-toggle");
+    const wrapper = document.getElementById("wrapper");
+
+    toggleButton.onclick = function() {
+        wrapper.classList.toggle("toggled");
+    };
+</script>
 
 </body>
 </html>

@@ -5,124 +5,199 @@
     <title>Manage Coupons - Admin</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
     <style>
-        body { background-color: #f8f9fa; }
-        .sidebar { min-height: 100vh; background: #343a40; color: #fff; }
-        .sidebar a { color: #adb5bd; text-decoration: none; padding: 15px 20px; display: block; border-bottom: 1px solid #4b545c; }
-        .sidebar a:hover, .sidebar a.active { background: #495057; color: #fff; border-left: 4px solid #fed700; }
+        /* 1. Base Setup */
+        body { 
+            background-color: #f8f9fa; 
+            overflow-x: hidden; 
+        }
+
+        /* 2. The Wrapper (Flex Container) */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+            transition: all 0.3s;
+        }
+
+        /* 3. The Sidebar */
+        .sidebar {
+            min-width: 250px; 
+            max-width: 250px;
+            min-height: 100vh;
+            background: #343a40;
+            color: #fff;
+            transition: margin 0.3s ease-out;
+        }
+
+        /* 4. The "Hidden" State */
+        #wrapper.toggled .sidebar {
+            margin-left: -250px; 
+        }
+
+        /* 5. The Content Area */
+        #page-content-wrapper {
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* --- Existing Sidebar Links --- */
+        .sidebar a {
+            color: #adb5bd;
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            border-bottom: 1px solid #4b545c;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: #495057;
+            color: #fff;
+            border-left: 4px solid #fed700;
+        }
     </style>
 </head>
 <body>
 
-<div class="d-flex">
+<div id="wrapper">
     
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR INCLUDE -->
     <%- include('../layouts/dashboard-sidebar') %>
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-grow-1 p-4">
-        <h2 class="mb-4">Coupon Management</h2>
+    <!-- MAIN CONTENT WRAPPER -->
+    <div id="page-content-wrapper">
+        
+        <!-- TOP NAVBAR WITH TOGGLE BUTTON -->
+        <nav class="navbar navbar-light bg-white border-bottom px-4 py-3 mb-4 shadow-sm">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-primary" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="ms-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Coupons</li>
+                    </ol>
+                </nav>
+            </div>
+        </nav>
 
-        <% if (error) { %>
-            <div class="alert alert-danger"><%= error %></div>
-        <% } %>
+        <!-- PAGE CONTENT -->
+        <div class="container-fluid px-4">
+            <h2 class="mb-4">Coupon Management</h2>
 
-        <div class="row g-4">
-            <!-- LIST -->
-            <div class="col-md-8">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">Active Coupons</h5>
+            <% if (error) { %>
+                <div class="alert alert-danger"><%= error %></div>
+            <% } %>
+
+            <div class="row g-4">
+                <!-- LIST -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Active Coupons</h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Code</th>
+                                        <th>Discount</th>
+                                        <th>Expires</th>
+                                        <th>Status</th>
+                                        <th class="text-end pe-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (coupons.length > 0) { %>
+                                        <% coupons.forEach(c => { %>
+                                            <tr>
+                                                <td class="ps-4 fw-bold font-monospace"><%= c.code %></td>
+                                                <td>
+                                                    <%= c.discountValue %><%= c.discountType === 'percentage' ? '%' : '$' %>
+                                                </td>
+                                                <td><%= new Date(c.expiresAt).toLocaleDateString() %></td>
+                                                <td>
+                                                    <!-- Click to Toggle Status -->
+                                                    <form action="/dashboard/coupons/toggle/<%= c._id %>" method="POST" class="d-inline">
+                                                        <button type="submit" class="badge border-0 <%= c.isActive ? 'bg-success' : 'bg-secondary' %>" style="cursor: pointer;">
+                                                            <%= c.isActive ? 'Active' : 'Inactive' %>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                                <td class="text-end pe-4">
+                                                    <form action="/dashboard/coupons/delete/<%= c._id %>" method="POST" onsubmit="return confirm('Delete coupon?');">
+                                                        <button class="btn btn-sm btn-outline-danger rounded-circle" style="width: 32px; height: 32px; padding: 0;">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr><td colspan="5" class="text-center py-4">No coupons found.</td></tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0 align-middle">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4">Code</th>
-                                    <th>Discount</th>
-                                    <th>Expires</th>
-                                    <th>Status</th>
-                                    <th class="text-end pe-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% if (coupons.length > 0) { %>
-                                    <% coupons.forEach(c => { %>
-                                        <tr>
-                                            <td class="ps-4 fw-bold font-monospace"><%= c.code %></td>
-                                            <td>
-                                                <%= c.discountValue %><%= c.discountType === 'percentage' ? '%' : '$' %>
-                                            </td>
-                                            <td><%= new Date(c.expiresAt).toLocaleDateString() %></td>
-                                            <td>
-                                                <!-- Click to Toggle Status -->
-                                                <form action="/dashboard/coupons/toggle/<%= c._id %>" method="POST" class="d-inline">
-                                                    <button type="submit" class="badge border-0 <%= c.isActive ? 'bg-success' : 'bg-secondary' %>" style="cursor: pointer;">
-                                                        <%= c.isActive ? 'Active' : 'Inactive' %>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                            <td class="text-end pe-4">
-                                                <form action="/dashboard/coupons/delete/<%= c._id %>" method="POST" onsubmit="return confirm('Delete coupon?');">
-                                                    <button class="btn btn-sm btn-outline-danger rounded-circle" style="width: 32px; height: 32px; padding: 0;">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    <% }) %>
-                                <% } else { %>
-                                    <tr><td colspan="5" class="text-center py-4">No coupons found.</td></tr>
-                                <% } %>
-                            </tbody>
-                        </table>
+                </div>
+
+                <!-- ADD FORM -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-success text-white py-3">
+                            <h5 class="mb-0"><i class="fas fa-plus me-2"></i> Add Coupon</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="/dashboard/coupons" method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label">Coupon Code</label>
+                                    <input type="text" name="code" class="form-control text-uppercase" placeholder="e.g. SUMMER50" required>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Type</label>
+                                        <select name="discountType" class="form-select">
+                                            <option value="percentage">% Percent</option>
+                                            <option value="fixed">$ Fixed</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Value</label>
+                                        <input type="number" name="discountValue" class="form-control" placeholder="10" required min="1">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Expiry Date</label>
+                                    <input type="date" name="expiresAt" class="form-control" required>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success">Create Coupon</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ADD FORM -->
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-success text-white py-3">
-                        <h5 class="mb-0"><i class="fas fa-plus me-2"></i> Add Coupon</h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="/dashboard/coupons" method="POST">
-                            <div class="mb-3">
-                                <label class="form-label">Coupon Code</label>
-                                <input type="text" name="code" class="form-control text-uppercase" placeholder="e.g. SUMMER50" required>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-6 mb-3">
-                                    <label class="form-label">Type</label>
-                                    <select name="discountType" class="form-select">
-                                        <option value="percentage">% Percent</option>
-                                        <option value="fixed">$ Fixed</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <label class="form-label">Value</label>
-                                    <input type="number" name="discountValue" class="form-control" placeholder="10" required min="1">
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Expiry Date</label>
-                                <input type="date" name="expiresAt" class="form-control" required>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-success">Create Coupon</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
-
     </div>
 </div>
+
+<!-- TOGGLE SCRIPT -->
+<script>
+    const toggleButton = document.getElementById("menu-toggle");
+    const wrapper = document.getElementById("wrapper");
+
+    toggleButton.onclick = function() {
+        wrapper.classList.toggle("toggled");
+    };
+</script>
 
 </body>
 </html>

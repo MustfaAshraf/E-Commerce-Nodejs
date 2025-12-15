@@ -7,12 +7,43 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <style>
-        body { background-color: #f8f9fa; }
+        /* 1. Base Setup */
+        body { 
+            background-color: #f8f9fa; 
+            overflow-x: hidden; 
+        }
+
+        /* 2. The Wrapper (Flex Container) */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+            transition: all 0.3s;
+        }
+
+        /* 3. The Sidebar (Targeting the class inside your include) */
         .sidebar {
+            min-width: 250px; 
+            max-width: 250px;
             min-height: 100vh;
             background: #343a40;
             color: #fff;
+            transition: margin 0.3s ease-out; /* Smooth slide */
         }
+
+        /* 4. The "Hidden" State */
+        /* When #wrapper has 'toggled' class, pull sidebar off-screen */
+        #wrapper.toggled .sidebar {
+            margin-left: -250px; 
+        }
+
+        /* 5. The Content Area */
+        #page-content-wrapper {
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* --- Existing Styles --- */
         .sidebar a {
             color: #adb5bd;
             text-decoration: none;
@@ -42,185 +73,201 @@
 </head>
 <body>
 
-<div class="d-flex">
-    
-    <!-- SIDEBAR -->
-    <%- include('../layouts/dashboard-sidebar') %>
-
-    <!-- MAIN CONTENT -->
-    <div class="flex-grow-1 p-4">
+    <div id="wrapper">
         
-        <h2 class="mb-4">Dashboard Overview</h2>
+        <!-- SIDEBAR INCLUDE -->
+        <!-- ensure this file contains the <div class="sidebar">...</div> -->
+        <%- include('../layouts/dashboard-sidebar') %>
 
-        <!-- Stats Cards -->
-        <div class="row g-4 mb-5">
-            <!-- Revenue -->
-            <div class="col-md-3">
-                <div class="card stat-card">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="icon-box bg-success me-3"><i class="fas fa-dollar-sign"></i></div>
-                        <div>
-                            <h6 class="text-muted mb-0">Revenue</h6>
-                            <h4 class="fw-bold mb-0">$<%= stats.revenue %></h4>
-                        </div>
-                    </div>
+        <!-- MAIN CONTENT WRAPPER -->
+        <div id="page-content-wrapper">
+            
+            <!-- 🆕 TOP NAVBAR WITH TOGGLE BUTTON -->
+            <nav class="navbar navbar-light bg-white border-bottom px-4 py-3 mb-4 shadow-sm">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-primary" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-0 ms-3">Dashboard Overview</h4>
                 </div>
-            </div>
-            <!-- Orders/Sales -->
-            <div class="col-md-3">
-                <div class="card stat-card">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="icon-box bg-primary me-3"><i class="fas fa-shopping-bag"></i></div>
-                        <div>
-                            <!-- Dynamic Label: Orders for Admin, Items Sold for Vendor -->
-                            <h6 class="text-muted mb-0"><%= isVendor ? 'Items Sold' : 'Total Orders' %></h6>
-                            <h4 class="fw-bold mb-0"><%= stats.orders %></h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Products -->
-            <div class="col-md-3">
-                <div class="card stat-card">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="icon-box bg-warning me-3"><i class="fas fa-box"></i></div>
-                        <div>
-                            <h6 class="text-muted mb-0">Products</h6>
-                            <h4 class="fw-bold mb-0"><%= stats.products %></h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Users -->
-            <div class="col-md-3">
-                <div class="card stat-card">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="icon-box bg-info me-3"><i class="fas fa-users"></i></div>
-                        <div>
-                            <h6 class="text-muted mb-0">Customers</h6>
-                            <h4 class="fw-bold mb-0"><%= stats.users %></h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            </nav>
 
-        <div class="row g-4">
-            <!-- Table: Switches based on Role -->
-            <div class="col-lg-8">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0"><%= isVendor ? 'Top Performing Products' : 'Recent Orders' %></h5>
+            <!-- DASHBOARD CONTENT -->
+            <div class="container-fluid px-4">
+                
+                <!-- Stats Cards -->
+                <div class="row g-4 mb-5">
+                    <!-- Revenue -->
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="icon-box bg-success me-3"><i class="fas fa-dollar-sign"></i></div>
+                                <div>
+                                    <h6 class="text-muted mb-0">Revenue</h6>
+                                    <h4 class="fw-bold mb-0">$<%= stats.revenue %></h4>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <% if (isVendor) { %>
-                                    <!-- VENDOR HEADERS -->
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Category</th>
-                                        <th>Price</th>
-                                        <th>Sold</th>
-                                        <th>Stock</th>
-                                    </tr>
-                                <% } else { %>
-                                    <!-- ADMIN HEADERS -->
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                <% } %>
-                            </thead>
-                            <tbody>
-                                <% if (recentOrders && recentOrders.length > 0) { %>
-                                    <% recentOrders.forEach(item => { %>
-                                        <tr>
-                                            <% if (isVendor) { %>
-                                                <!-- RENDER PRODUCT ROW -->
-                                                <td><%= item.name %></td>
-                                                <td><%= item.category ? item.category.name : '-' %></td>
-                                                <td>$<%= item.price.toFixed(2) %></td>
-                                                <td class="fw-bold text-success"><%= item.sold %></td>
-                                                <td><%= item.quantity %></td>
-                                            <% } else { %>
-                                                <!-- RENDER ORDER ROW -->
-                                                <td>#<%= item._id.toString().slice(-6).toUpperCase() %></td>
-                                                <td><%= item.userId ? item.userId.name : 'Guest' %></td>
-                                                <td>$<%= item.totalPrice.toFixed(2) %></td>
-                                                <td>
-                                                    <% if (item.status === 'pending') { %>
-                                                        <span class="badge bg-warning text-dark">Pending</span>
-                                                    <% } else if (item.status === 'confirmed') { %>
-                                                        <span class="badge bg-info">Confirmed</span>
-                                                    <% } else if (item.status === 'delivered') { %>
-                                                        <span class="badge bg-success">Delivered</span>
+                    <!-- Orders/Sales -->
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="icon-box bg-primary me-3"><i class="fas fa-shopping-bag"></i></div>
+                                <div>
+                                    <h6 class="text-muted mb-0"><%= isVendor ? 'Items Sold' : 'Total Orders' %></h6>
+                                    <h4 class="fw-bold mb-0"><%= stats.orders %></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Products -->
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="icon-box bg-warning me-3"><i class="fas fa-box"></i></div>
+                                <div>
+                                    <h6 class="text-muted mb-0">Products</h6>
+                                    <h4 class="fw-bold mb-0"><%= stats.products %></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Users -->
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="icon-box bg-info me-3"><i class="fas fa-users"></i></div>
+                                <div>
+                                    <h6 class="text-muted mb-0">Customers</h6>
+                                    <h4 class="fw-bold mb-0"><%= stats.users %></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Table -->
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0"><%= isVendor ? 'Top Performing Products' : 'Recent Orders' %></h5>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <% if (isVendor) { %>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Category</th>
+                                                <th>Price</th>
+                                                <th>Sold</th>
+                                                <th>Stock</th>
+                                            </tr>
+                                        <% } else { %>
+                                            <tr>
+                                                <th>Order ID</th>
+                                                <th>Customer</th>
+                                                <th>Amount</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        <% } %>
+                                    </thead>
+                                    <tbody>
+                                        <% if (recentOrders && recentOrders.length > 0) { %>
+                                            <% recentOrders.forEach(item => { %>
+                                                <tr>
+                                                    <% if (isVendor) { %>
+                                                        <td><%= item.name %></td>
+                                                        <td><%= item.category ? item.category.name : '-' %></td>
+                                                        <td>$<%= item.price.toFixed(2) %></td>
+                                                        <td class="fw-bold text-success"><%= item.sold %></td>
+                                                        <td><%= item.quantity %></td>
                                                     <% } else { %>
-                                                        <span class="badge bg-danger"><%= item.status %></span>
+                                                        <td>#<%= item._id.toString().slice(-6).toUpperCase() %></td>
+                                                        <td><%= item.userId ? item.userId.name : 'Guest' %></td>
+                                                        <td>$<%= item.totalPrice.toFixed(2) %></td>
+                                                        <td>
+                                                            <% if (item.status === 'pending') { %>
+                                                                <span class="badge bg-warning text-dark">Pending</span>
+                                                            <% } else if (item.status === 'confirmed') { %>
+                                                                <span class="badge bg-info">Confirmed</span>
+                                                            <% } else if (item.status === 'delivered') { %>
+                                                                <span class="badge bg-success">Delivered</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-danger"><%= item.status %></span>
+                                                            <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <a href="/dashboard/orders/<%= item._id %>" class="btn btn-sm btn-outline-primary">View</a>
+                                                        </td>
                                                     <% } %>
-                                                </td>
-                                                <td>
-                                                    <a href="/dashboard/orders/<%= item._id %>" class="btn btn-sm btn-outline-primary">View</a>
-                                                </td>
-                                            <% } %>
-                                        </tr>
-                                    <% }) %>
-                                <% } else { %>
-                                    <tr><td colspan="5" class="text-center py-3">No data available.</td></tr>
-                                <% } %>
-                            </tbody>
-                        </table>
+                                                </tr>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <tr><td colspan="5" class="text-center py-3">No data available.</td></tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Chart -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">Revenue Trend</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="salesChart"></canvas>
+                    <!-- Chart -->
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Revenue Trend</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
-
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('salesChart').getContext('2d');
-    
-    // Fallback if data is empty to prevent crash
-    const rawLabels = <%- chart.labels || '[]' %>;
-    const rawData = <%- chart.data || '[]' %>;
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 1. Sidebar Toggle Logic
+        const toggleButton = document.getElementById("menu-toggle");
+        const wrapper = document.getElementById("wrapper");
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: rawLabels,
-            datasets: [{
-                label: 'Revenue ($)',
-                data: rawData,
-                borderColor: '#fed700',
-                backgroundColor: 'rgba(254, 215, 0, 0.2)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } }
-        }
-    });
-</script>
+        toggleButton.onclick = function() {
+            wrapper.classList.toggle("toggled");
+        };
+
+        // 2. Chart Logic
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const rawLabels = <%- chart.labels || '[]' %>;
+        const rawData = <%- chart.data || '[]' %>;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: rawLabels,
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: rawData,
+                    borderColor: '#fed700',
+                    backgroundColor: 'rgba(254, 215, 0, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
 
 </body>
 </html>

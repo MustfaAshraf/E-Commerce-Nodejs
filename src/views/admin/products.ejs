@@ -7,12 +7,50 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <style>
-        body { background-color: #f8f9fa; }
+        /* 1. Base Setup */
+        body { 
+            background-color: #f8f9fa; 
+            overflow-x: hidden; 
+        }
+
+        /* 2. The Wrapper (Flex Container) */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+            transition: all 0.3s;
+        }
+
+        /* 3. The Sidebar */
         .sidebar {
+            min-width: 250px; 
+            max-width: 250px;
             min-height: 100vh;
             background: #343a40;
             color: #fff;
+            transition: margin 0.3s ease-out;
         }
+
+        /* 4. The "Hidden" State */
+        #wrapper.toggled .sidebar {
+            margin-left: -250px; 
+        }
+
+        /* 5. The Content Area */
+        #page-content-wrapper {
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* --- Table & Action Styles --- */
+        .img-thumbnail {
+            width: 50px; height: 50px; object-fit: cover;
+        }
+        .action-btn { 
+            width: 35px; height: 35px; padding: 0; line-height: 35px; 
+        }
+        
+        /* Sidebar Links (Inherited style) */
         .sidebar a {
             color: #adb5bd;
             text-decoration: none;
@@ -25,118 +63,144 @@
             color: #fff;
             border-left: 4px solid #fed700;
         }
-        .img-thumbnail {
-            width: 50px; height: 50px; object-fit: cover;
-        }
-        .action-btn { width: 35px; height: 35px; padding: 0; line-height: 35px; }
     </style>
 </head>
 <body>
 
-<div class="d-flex">
+<div id="wrapper">
     
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR INCLUDE -->
     <%- include('../layouts/dashboard-sidebar') %>
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-grow-1 p-4">
+    <!-- MAIN CONTENT WRAPPER -->
+    <div id="page-content-wrapper">
         
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Product Management</h2>
-            <!-- Link points to the Shop/Product route for creating -->
-            <a href="/products/add" class="btn btn-success rounded-pill px-4">
-                <i class="fas fa-plus me-2"></i> Add New Product
-            </a>
-        </div>
+        <!-- TOP NAVBAR WITH TOGGLE BUTTON -->
+        <nav class="navbar navbar-light bg-white border-bottom px-4 py-3 mb-4 shadow-sm">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-primary" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <!-- Breadcrumb / Title -->
+                <nav aria-label="breadcrumb" class="ms-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Products</li>
+                    </ol>
+                </nav>
+            </div>
+        </nav>
 
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light text-secondary">
-                            <tr>
-                                <th class="ps-4">Image</th>
-                                <th>Product Name</th>
-                                <!-- 🆕 Show Owner column ONLY for Admins -->
-                                <% if (user.role === 'admin') { %>
-                                    <th>Owner</th>
-                                <% } %>
-                                <th>Category</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Sold</th>
-                                <th class="text-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% if (products.length > 0) { %>
-                                <% products.forEach(product => { %>
-                                    <tr>
-                                        <td class="ps-4">
-                                            <img src="/uploads/productImages/<%= product.image %>" class="img-thumbnail rounded" alt="">
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold"><%= product.name %></div>
-                                            <small class="text-muted">ID: <%= product._id.toString().slice(-4) %></small>
-                                        </td>
-                                        
-                                        <!-- 🆕 Owner Data -->
-                                        <% if (user.role === 'admin') { %>
+        <!-- PAGE CONTENT -->
+        <div class="container-fluid px-4">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Product Management</h2>
+                <!-- Create Button -->
+                <a href="/products/add" class="btn btn-success rounded-pill px-4">
+                    <i class="fas fa-plus me-2"></i> Add New Product
+                </a>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-5">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-secondary">
+                                <tr>
+                                    <th class="ps-4">Image</th>
+                                    <th>Product Name</th>
+                                    <!-- 🆕 Show Owner column ONLY for Admins -->
+                                    <% if (user.role === 'admin') { %>
+                                        <th>Owner</th>
+                                    <% } %>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Sold</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (products.length > 0) { %>
+                                    <% products.forEach(product => { %>
+                                        <tr>
+                                            <td class="ps-4">
+                                                <img src="/uploads/productImages/<%= product.image %>" class="img-thumbnail rounded" alt="">
+                                            </td>
                                             <td>
-                                                <span class="badge bg-secondary">
-                                                    <i class="fas fa-user me-1"></i>
-                                                    <%= product.owner ? product.owner.name : 'Unknown' %>
+                                                <div class="fw-bold"><%= product.name %></div>
+                                                <small class="text-muted">ID: <%= product._id.toString().slice(-4) %></small>
+                                            </td>
+                                            
+                                            <!-- 🆕 Owner Data -->
+                                            <% if (user.role === 'admin') { %>
+                                                <td>
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-user me-1"></i>
+                                                        <%= product.owner ? product.owner.name : 'Unknown' %>
+                                                    </span>
+                                                </td>
+                                            <% } %>
+
+                                            <td>
+                                                <span class="badge bg-light text-dark border">
+                                                    <%= product.category ? product.category.name : 'Uncategorized' %>
                                                 </span>
                                             </td>
-                                        <% } %>
-
-                                        <td>
-                                            <span class="badge bg-light text-dark border">
-                                                <%= product.category ? product.category.name : 'Uncategorized' %>
-                                            </span>
-                                        </td>
-                                        <td>$<%= product.price.toFixed(2) %></td>
-                                        <td>
-                                            <% if (product.quantity > 5) { %>
-                                                <span class="text-success fw-bold"><%= product.quantity %></span>
-                                            <% } else if (product.quantity > 0) { %>
-                                                <span class="text-warning fw-bold"><%= product.quantity %> (Low)</span>
-                                            <% } else { %>
-                                                <span class="text-danger fw-bold">Out of Stock</span>
-                                            <% } %>
-                                        </td>
-                                        <td><%= product.sold %></td>
-                                        <td class="text-end pe-4">
-                                            <!-- Edit -->
-                                            <a href="/products/edit/<%= product._id %>" class="btn btn-primary action-btn rounded-circle me-1" title="Edit">
-                                                <i class="fas fa-edit" style="font-size: 14px;"></i>
-                                            </a>
-                                            <!-- Delete -->
-                                            <form action="/products/delete/<%= product._id %>" method="POST" class="d-inline" onsubmit="return confirm('Delete this product permanently?');">
-                                                <button type="submit" class="btn btn-danger action-btn rounded-circle" title="Delete">
-                                                    <i class="fas fa-trash" style="font-size: 14px;"></i>
-                                                </button>
-                                            </form>
+                                            <td>$<%= product.price.toFixed(2) %></td>
+                                            <td>
+                                                <% if (product.quantity > 5) { %>
+                                                    <span class="text-success fw-bold"><%= product.quantity %></span>
+                                                <% } else if (product.quantity > 0) { %>
+                                                    <span class="text-warning fw-bold"><%= product.quantity %> (Low)</span>
+                                                <% } else { %>
+                                                    <span class="text-danger fw-bold">Out of Stock</span>
+                                                <% } %>
+                                            </td>
+                                            <td><%= product.sold %></td>
+                                            <td class="text-end pe-4">
+                                                <!-- Edit -->
+                                                <a href="/products/edit/<%= product._id %>" class="btn btn-primary action-btn rounded-circle me-1" title="Edit">
+                                                    <i class="fas fa-edit" style="font-size: 14px;"></i>
+                                                </a>
+                                                <!-- Delete -->
+                                                <form action="/products/delete/<%= product._id %>" method="POST" class="d-inline" onsubmit="return confirm('Delete this product permanently?');">
+                                                    <button type="submit" class="btn btn-danger action-btn rounded-circle" title="Delete">
+                                                        <i class="fas fa-trash" style="font-size: 14px;"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <!-- Dynamic Colspan based on role -->
+                                        <td colspan="<%= user.role === 'admin' ? 8 : 7 %>" class="text-center py-5 text-muted">
+                                            <i class="fas fa-box-open fa-3x mb-3"></i>
+                                            <p>No products found.</p>
                                         </td>
                                     </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr>
-                                    <!-- Dynamic Colspan based on role -->
-                                    <td colspan="<%= user.role === 'admin' ? 8 : 7 %>" class="text-center py-5 text-muted">
-                                        <i class="fas fa-box-open fa-3x mb-3"></i>
-                                        <p>No products found.</p>
-                                    </td>
-                                </tr>
-                            <% } %>
-                        </tbody>
-                    </table>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
+
+<!-- TOGGLE SCRIPT -->
+<script>
+    const toggleButton = document.getElementById("menu-toggle");
+    const wrapper = document.getElementById("wrapper");
+
+    toggleButton.onclick = function() {
+        wrapper.classList.toggle("toggled");
+    };
+</script>
 
 </body>
 </html>
